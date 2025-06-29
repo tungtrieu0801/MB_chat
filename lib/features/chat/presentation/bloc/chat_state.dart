@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import '../../../domain/entities/chat_message.dart';
+import 'package:mobile_trip_togethor/features/chat/domain/entities/chat_message.dart';
 
 abstract class ChatState extends Equatable {
   const ChatState();

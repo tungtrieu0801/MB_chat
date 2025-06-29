@@ -7,5 +7,5 @@ class ChatMessage {
     required this.id,
     required this.content,
     required this.senderId
-  })
+  }) {}
 }

@@ -1,8 +1,12 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mobile_trip_togethor/features/chat/domain/usecases/fetch_message_usercase.dart';
+import 'package:mobile_trip_togethor/features/chat/presentation/bloc/chat_event.dart';
+import 'package:mobile_trip_togethor/features/chat/presentation/bloc/chat_state.dart';
+
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
   final FetchMessagesUseCase fetchMessages;
-  final SendMessageUseCase sendMessage;
 
-  ChatBloc(this.fetchMessages, this.sendMessage) : super(ChatInitial()) {
+  ChatBloc(this.fetchMessages) : super(ChatInitial()) {
     on<LoadChat>((event, emit) async {
       emit(ChatLoading());
       try {
@@ -13,13 +17,5 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       }
     });
 
-    on<SendMessage>((event, emit) async {
-      try {
-        await sendMessage(event.roomId, event.content);
-        add(LoadChat(event.roomId)); // Tải lại sau khi gửi
-      } catch (e) {
-        emit(ChatError('Không gửi được tin nhắn'));
-      }
-    });
   }
 }

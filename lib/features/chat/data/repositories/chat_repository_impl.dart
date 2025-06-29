@@ -10,7 +10,7 @@ class ChatRepositoryImpl implements ChatRepository {
 
   @override
   Future<List<ChatMessage>> getMessage(String roomId) {
-    final models = await remoteDatasource.fetchMessages(roomId);
-    return models.map((m) => m).toList();
+    // TODO: implement getMessage
+    throw UnimplementedError();
   }
 }

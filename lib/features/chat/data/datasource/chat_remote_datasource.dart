@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:mobile_trip_togethor/features/chat/data/models/chat_message_model.dart';
 
 class ChatRemoteDatasource {
