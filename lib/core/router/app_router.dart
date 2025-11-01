@@ -4,7 +4,7 @@ import 'package:mobile_trip_togethor/features/auth/presentation/screens/auth_scr
 import 'package:mobile_trip_togethor/features/chat/presentation/screens/chat_screen.dart';
 
 final GoRouter router = GoRouter(
-  initialLocation: '/',
+  initialLocation: '/chat',
   routes: [
     GoRoute(
       path: '/chat',
