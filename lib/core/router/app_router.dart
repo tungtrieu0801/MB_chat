@@ -1,25 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mobile_trip_togethor/features/app/presentation/main_screen.dart';
 import 'package:mobile_trip_togethor/features/auth/presentation/screens/auth_screen.dart';
 import 'package:mobile_trip_togethor/features/chat/presentation/screens/chat_screen.dart';
+import 'package:mobile_trip_togethor/features/user/presentaion/profile_screen.dart';
+
+final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final GoRouter router = GoRouter(
-  initialLocation: '/chat',
+  navigatorKey: _rootNavigatorKey,
+  initialLocation: '/',
   routes: [
-    GoRoute(
-      path: '/chat',
-      builder: (context, state) => ChatScreen(),
+    // ShellRoute for the main app navigation (with BottomNavBar)
+    ShellRoute(
+      builder: (BuildContext context, GoRouterState state, Widget child) {
+        return MainScreen(child: child);
+      },
+      routes: <RouteBase>[
+        // Route for the Chat screen (Home tab)
+        GoRoute(
+          path: '/',
+          builder: (BuildContext context, GoRouterState state) {
+            return const ChatScreen();
+          },
+        ),
+        // Route for the Profile screen
+        GoRoute(
+          path: '/profile',
+          builder: (BuildContext context, GoRouterState state) {
+            return ProfileScreen();
+          },
+        ),
+      ],
     ),
+
+    // Standalone route for Authentication
     GoRoute(
-      path: '/',
-      builder: (context, state) => AuthScreen(),
+      path: '/auth',
+      builder: (context, state) => const AuthScreen(),
     ),
-    // GoRoute(
-    //   path: '/detail/:id',
-    //   builder: (context, state) {
-    //     final id = state.pathParameters['id'];
-    //     return DetailScreen(id: id);
-    //   },
-    // ),
   ],
 );

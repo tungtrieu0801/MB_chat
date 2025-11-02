@@ -1,18 +1,13 @@
 import 'package:flutter/material.dart';
 
-class ChatScreen extends StatefulWidget {
+class ChatScreen extends StatelessWidget {
   const ChatScreen({super.key});
 
-  @override
-  State<ChatScreen> createState() => _ChatScreenState();
-}
-
-class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mengobrol', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('Mengobrolx', style: TextStyle(fontWeight: FontWeight.bold)),
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
@@ -39,7 +34,7 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: 10, // Replace with actual chat list length from BLoC
+              itemCount: 7, // Replace with actual chat list length from BLoC
               itemBuilder: (context, index) {
                 // Replace with ChatListItem widget
                 return const ListTile(
@@ -70,24 +65,6 @@ class _ChatScreenState extends State<ChatScreen> {
         backgroundColor: Colors.black,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: 'Profile',
-          ),
-        ],
-        currentIndex: 0, // Set current index based on router
-        onTap: (index) {},
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.grey,
-      ),
     );
   }
 
@@ -98,7 +75,7 @@ class _ChatScreenState extends State<ChatScreen> {
         height: 100,
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
-          itemCount: 8, // Replace with actual story list length + 1 for 'Add story'
+          itemCount: 5, // Replace with actual story list length + 1 for 'Add story'
           itemBuilder: (context, index) {
             if (index == 0) {
               // 'Add story' button
