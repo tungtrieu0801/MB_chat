@@ -3,15 +3,23 @@ import 'package:go_router/go_router.dart';
 import 'package:mobile_trip_togethor/features/app/presentation/main_screen.dart';
 import 'package:mobile_trip_togethor/features/auth/presentation/pages/login_widget.dart';
 import 'package:mobile_trip_togethor/features/chat/presentation/screens/chat_screen.dart';
+import 'package:mobile_trip_togethor/features/splash/presentaion/page/splash_page.dart';
 import 'package:mobile_trip_togethor/features/user/presentaion/profile_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../features/auth/data/datasources/auth_local_data_source.dart';
 
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 
+Future<AuthLocalDataSource> initAuthLocalDataSource() async {
+  final prefs = await SharedPreferences.getInstance();
+  return AuthLocalDataSourceImpl(prefs);
+}
+
 final GoRouter router = GoRouter(
   navigatorKey: _rootNavigatorKey,
-  initialLocation: '/auth',
+  initialLocation: '/splash',
   routes: [
     // ShellRoute for the main app navigation (with BottomNavBar)
     ShellRoute(
@@ -40,6 +48,25 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/auth',
       builder: (context, state) =>  LoginPage(),
+    ),
+    GoRoute(
+      path: '/splash',
+      builder: (context, state) => FutureBuilder<AuthLocalDataSource>(
+        future: initAuthLocalDataSource(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
+          if (snapshot.hasError || !snapshot.hasData) {
+            return const Scaffold(
+              body: Center(child: Text('Failed to init')),
+            );
+          }
+          return SplashScreen(authLocalDataSource: snapshot.data!);
+        },
+      ),
     ),
   ],
 );

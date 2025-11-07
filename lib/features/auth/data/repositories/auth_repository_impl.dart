@@ -26,6 +26,8 @@ class AuthRepositoryImpl implements AuthRepository {
       // Lưu vào local cache (SharedPreferences)
       await localDataSource.cacheUser(user);
 
+      print('User saved to cache: id=${user.id}, username=${user.username}, email=${user.email}, accessToken=${user.accessToken}');
+
       return user;
     } catch (e) {
       // Bạn có thể custom Exception ở đây nếu muốn
