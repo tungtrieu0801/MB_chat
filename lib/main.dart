@@ -16,8 +16,7 @@ void main() async {
   final prefs = await SharedPreferences.getInstance();
 
   // --- Khởi tạo các dependency (DI thủ công, có thể dùng get_it sau) ---
-  final dio = Dio();
-  final remoteDataSource = AuthRemoteDataSource(dio);
+  final remoteDataSource = AuthRemoteDataSource();
   final localDataSource = AuthLocalDataSourceImpl(prefs);
   final repository = AuthRepositoryImpl(remoteDataSource, localDataSource);
   final loginUsecase = LoginUsecase(repository);

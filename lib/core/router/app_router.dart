@@ -4,10 +4,10 @@ import 'package:mobile_trip_togethor/features/app/presentation/main_screen.dart'
 import 'package:mobile_trip_togethor/features/auth/presentation/pages/login_widget.dart';
 import 'package:mobile_trip_togethor/features/chat/presentation/screens/chat_screen.dart';
 import 'package:mobile_trip_togethor/features/splash/presentaion/page/splash_page.dart';
-import 'package:mobile_trip_togethor/features/user/presentaion/profile_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../features/auth/data/datasources/auth_local_data_source.dart';
+import '../../features/profile/presentaion/profile_screen.dart';
 
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();

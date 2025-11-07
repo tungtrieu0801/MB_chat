@@ -30,12 +30,11 @@ class AuthRepositoryImpl implements AuthRepository {
 
       return user;
     } catch (e) {
-      // Bạn có thể custom Exception ở đây nếu muốn
       rethrow;
     }
   }
 
-  /// Trả về user đã lưu (nếu có) — null nếu chưa có
+  /// Trả về profile đã lưu (nếu có) — null nếu chưa có
   Future<User?> getCachedUser() async {
     try {
       return await localDataSource.getCachedUser();
@@ -45,7 +44,7 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
-  /// Xóa cache user (dùng cho logout)
+  /// Xóa cache profile (dùng cho logout)
   Future<void> clearCache() async {
     try {
       await localDataSource.clearCache();
