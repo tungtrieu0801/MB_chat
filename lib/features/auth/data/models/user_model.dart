@@ -1,8 +1,7 @@
 import 'dart:convert';
-
 import '../../domain/entities/user.dart';
 
-class UserModel {
+class LoginResponseModel {
   final String id;
   final String username;
   final String email;
@@ -10,7 +9,7 @@ class UserModel {
   final String accessToken;
   final String avatar;
 
-  UserModel({
+  LoginResponseModel({
     required this.id,
     required this.username,
     required this.email,
@@ -19,15 +18,15 @@ class UserModel {
     required this.avatar,
   });
 
-  factory UserModel.fromJson(Map<String, dynamic> json) {
-    final data = json['data'] ?? json; // Phòng trường hợp API trả thẳng data
-    return UserModel(
-      id: data['id'] ?? '',
-      username: data['username'] ?? '',
-      email: data['email'] ?? '',
-      phoneNumber: data['phoneNumber'] ?? '',
-      accessToken: data['accessToken'] ?? '',
-      avatar: data['avatar'] ?? '',
+  /// Parse JSON trực tiếp user object, không check `data`
+  factory LoginResponseModel.fromJson(Map<String, dynamic> json) {
+    return LoginResponseModel(
+      id: json['id'] ?? '',
+      username: json['username'] ?? '',
+      email: json['email'] ?? '',
+      phoneNumber: json['phoneNumber'] ?? '',
+      accessToken: json['accessToken'] ?? '',
+      avatar: json['avatar'] ?? '',
     );
   }
 
@@ -44,8 +43,8 @@ class UserModel {
   String toJsonString() => jsonEncode(toJson());
 
   /// Dùng để đọc lại từ SharedPreferences
-  factory UserModel.fromJsonString(String jsonString) =>
-      UserModel.fromJson(jsonDecode(jsonString));
+  factory LoginResponseModel.fromJsonString(String jsonString) =>
+      LoginResponseModel.fromJson(jsonDecode(jsonString));
 
   /// Convert sang domain entity
   User toEntity() => User(
@@ -58,7 +57,7 @@ class UserModel {
   );
 
   /// Convert từ domain entity sang model
-  factory UserModel.fromEntity(User user) => UserModel(
+  factory LoginResponseModel.fromEntity(User user) => LoginResponseModel(
     id: user.id,
     username: user.username,
     email: user.email,

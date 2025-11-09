@@ -15,17 +15,17 @@ class AuthRepositoryImpl implements AuthRepository {
       final userModel = await remoteDataSource.login(username, password);
 
       final user = User(
-        id: userModel.id,
-        username: userModel.username,
-        email: userModel.email,
-        phoneNumber: userModel.phoneNumber,
+        id: userModel!.id,
+        username: userModel!.username,
+        email: userModel!.email,
+        phoneNumber: userModel!.phoneNumber,
         accessToken: userModel.accessToken,
-        avatar: userModel.avatar,
+        avatar: userModel!.avatar,
       );
 
       // Lưu vào local cache (SharedPreferences)
       await localDataSource.cacheUser(user);
-
+      await localDataSource.saveToken(user.accessToken);
       print('User saved to cache: id=${user.id}, username=${user.username}, email=${user.email}, accessToken=${user.accessToken}');
 
       return user;

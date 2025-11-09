@@ -6,6 +6,7 @@ abstract class AuthLocalDataSource {
   Future<void> cacheUser(User user);
   Future<User?> getCachedUser();
   Future<void> clearCache();
+  Future<void> saveToken(String token);
 }
 
 class AuthLocalDataSourceImpl implements AuthLocalDataSource {
@@ -16,7 +17,7 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
 
   @override
   Future<void> cacheUser(User user) async {
-    final userModel = UserModel.fromEntity(user);
+    final userModel = LoginResponseModel.fromEntity(user);
     await sharedPreferences.setString(cachedUserKey, userModel.toJsonString());
   }
 
@@ -24,7 +25,7 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   Future<User?> getCachedUser() async {
     final jsonString = sharedPreferences.getString(cachedUserKey);
     if (jsonString != null) {
-      final userModel = UserModel.fromJsonString(jsonString);
+      final userModel = LoginResponseModel.fromJsonString(jsonString);
       return userModel.toEntity();
     }
     return null;
@@ -33,5 +34,11 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   @override
   Future<void> clearCache() async {
     await sharedPreferences.remove(cachedUserKey);
+  }
+
+  @override
+  Future<void> saveToken(String token) async{
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('access_token', token);
   }
 }

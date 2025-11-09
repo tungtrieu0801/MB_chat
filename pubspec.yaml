@@ -41,6 +41,8 @@ dependencies:
   flutter_screenutil: ^5.9.3
   shared_preferences: ^2.5.3
   lottie: ^3.0.0
+  pretty_qr_code: ^3.5.0
+  get_it: ^9.0.5
 dev_dependencies:
   flutter_test:
     sdk: flutter

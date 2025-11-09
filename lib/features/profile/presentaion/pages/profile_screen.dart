@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
@@ -77,6 +78,34 @@ class ProfileScreen extends StatelessWidget {
                     ),
                   ),
                   IconButton(onPressed: () {}, icon: Icon(Icons.person))
+                ],
+              ),
+            ),
+            InkWell(
+              onTap: () {
+                print("tap");
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    child: Row(
+                      children: [
+                        Icon(Icons.style_outlined),
+                        SizedBox(width: 20.w,),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("My QRcode"),
+                            Text("Scan QR code to add friend")
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(onPressed: () {
+                    context.go("/qrcode");
+                  }, icon: Icon(Icons.person))
                 ],
               ),
             )
