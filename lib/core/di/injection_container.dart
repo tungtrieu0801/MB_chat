@@ -1,6 +1,8 @@
 import 'package:get_it/get_it.dart';
+import 'package:mobile_trip_togethor/core/network/socket_manager.dart';
 import 'package:mobile_trip_togethor/features/chat/data/datasource/message_remote_datasource.dart';
 import 'package:mobile_trip_togethor/features/chat/data/datasource/room_remote_datasource.dart';
+import 'package:mobile_trip_togethor/features/chat/data/datasource/socker_remote_datasource.dart';
 import 'package:mobile_trip_togethor/features/chat/data/repositories/message_repository_impl.dart';
 import 'package:mobile_trip_togethor/features/chat/data/repositories/room_repository_impl.dart';
 import 'package:mobile_trip_togethor/features/chat/domain/repositories/message_repository.dart';
@@ -45,4 +47,10 @@ Future<void> init() async {
   sl.registerLazySingleton<LoginUsecase>(() => LoginUsecase(sl()));
   sl.registerLazySingleton<GetListRoomUseCase>(() => GetListRoomUseCase(sl()));
   sl.registerLazySingleton<GetListMessageUseCase>(() => GetListMessageUseCase(sl()));
+
+  // Socket manager singleton
+  sl.registerLazySingleton<SocketManager>(() => SocketManager());
+
+  // Socket remote datasource
+  sl.registerLazySingleton<SocketRemoteDataSource>(() => SocketRemoteDataSourceImpl(sl()));
 }
