@@ -2,10 +2,11 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mobile_trip_togethor/features/chat/presentation/bloc/room/room_bloc.dart';
-import 'package:mobile_trip_togethor/features/chat/presentation/bloc/room/room_state.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mobile_trip_togethor/features/chat/presentation/bloc/room_list/room_bloc.dart';
+import 'package:mobile_trip_togethor/features/chat/presentation/bloc/room_list/room_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../bloc/room/room_event.dart';
+import '../bloc/room_list/room_event.dart';
 
 class ChatScreen extends StatelessWidget {
   const ChatScreen({super.key});
@@ -22,7 +23,6 @@ class ChatScreen extends StatelessWidget {
     final Map<String, dynamic> userMap = jsonDecode(userJson);
     return userMap['id'] ?? '';
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -132,7 +132,7 @@ class ChatScreenContent extends StatelessWidget {
                             ],
                           ),
                           onTap: () {
-                            // TODO: Navigate to chat detail
+                            context.push('/chat/${room.id}');
                           },
                         );
                       },

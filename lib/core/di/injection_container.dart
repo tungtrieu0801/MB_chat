@@ -1,7 +1,11 @@
 import 'package:get_it/get_it.dart';
+import 'package:mobile_trip_togethor/features/chat/data/datasource/message_remote_datasource.dart';
 import 'package:mobile_trip_togethor/features/chat/data/datasource/room_remote_datasource.dart';
+import 'package:mobile_trip_togethor/features/chat/data/repositories/message_repository_impl.dart';
 import 'package:mobile_trip_togethor/features/chat/data/repositories/room_repository_impl.dart';
+import 'package:mobile_trip_togethor/features/chat/domain/repositories/message_repository.dart';
 import 'package:mobile_trip_togethor/features/chat/domain/repositories/room_repository.dart';
+import 'package:mobile_trip_togethor/features/chat/domain/usecases/get_list_message_usecase.dart';
 import 'package:mobile_trip_togethor/features/chat/domain/usecases/get_list_room_usecase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -24,6 +28,7 @@ Future<void> init() async {
         () => AuthLocalDataSourceImpl(sl()),
   );
   sl.registerLazySingleton<RoomRemoteDatasource>(() => RoomRemoteDatasource());
+  sl.registerLazySingleton<MessageRemoteDataSource>(() => MessageRemoteDataSource());
 
   // --- Repository ---
   sl.registerLazySingleton<AuthRepository>(
@@ -32,8 +37,12 @@ Future<void> init() async {
   sl.registerLazySingleton<RoomRepository>(
       () => RoomRepositoryImpl(sl()),
   );
+  sl.registerLazySingleton<MessageRepository>(
+      () => MessageRepositoryImpl(sl()),
+  );
 
   // --- Use cases ---
   sl.registerLazySingleton<LoginUsecase>(() => LoginUsecase(sl()));
   sl.registerLazySingleton<GetListRoomUseCase>(() => GetListRoomUseCase(sl()));
+  sl.registerLazySingleton<GetListMessageUseCase>(() => GetListMessageUseCase(sl()));
 }

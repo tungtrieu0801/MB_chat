@@ -1,5 +1,5 @@
 class ApiEndpoint {
-  static const String baseUrl = 'http://192.168.1.3:3000';
+  static const String baseUrl = 'http://192.168.173.209:3000';
 
   static const String loginUrl = '$baseUrl/auth/login';
 
@@ -10,5 +10,8 @@ class ApiEndpoint {
   static const String getUserDetail = '$baseUrl/users/details';
 
   static const String getListRoom = '$baseUrl/rooms';
+
+  static String getListMessageInRoom(String roomId, int page, int limit) =>
+      '$baseUrl/messages/room/$roomId?page=$page&limit=$limit';
   
 }
