@@ -22,7 +22,7 @@ class SocketManager {
     _isConnecting = true;
 
     _socket = IO.io(
-      ApiEndpoint.socketUrl,
+      ApiEndpoint.baseUrl,
       IO.OptionBuilder()
           .setTransports(['websocket', 'polling'])
           .enableAutoConnect()
