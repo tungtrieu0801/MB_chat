@@ -29,3 +29,21 @@ class RoomError extends RoomState {
   @override
   List<Object?> get props => [message];
 }
+
+class Message {
+  final String id;
+  final String content;
+  final String roomId;
+  final String senderId;
+  final DateTime createdAt;
+
+  Message({
+    required this.id,
+    required this.content,
+    required this.roomId,
+    required this.senderId,
+    required this.createdAt,
+  });
+}
+
+

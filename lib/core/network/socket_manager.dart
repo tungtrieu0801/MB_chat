@@ -1,4 +1,3 @@
-// core/network/socket_manager.dart
 import 'dart:async';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import '../constants/api_endpoint.dart';
@@ -17,49 +16,38 @@ class SocketManager {
   bool get isConnected => _socket?.connected == true;
 
   void initAndConnect({String? namespacePath}) {
-    // Nếu đã có socket và connected thì thôi
     if (_socket != null && _socket!.connected) return;
     if (_isConnecting) return;
 
     _isConnecting = true;
 
     _socket = IO.io(
-      ApiEndpoint.socketUrl, // ví dụ: http://192.168.173.209:3000
+      ApiEndpoint.socketUrl,
       IO.OptionBuilder()
-          // .setPath(namespacePath ?? '/chat') // namespace / path nếu cần
           .setTransports(['websocket', 'polling'])
-          .enableAutoConnect() // auto connect khi tạo
-          .enableReconnection() // bật reconnect tự động
+          .enableAutoConnect()
+          .enableReconnection()
           .build(),
     );
 
-    // Các listener cơ bản (một lần)
     _socket!
       ..onConnect((_) {
         _isConnecting = false;
         print('SocketManager: connected (${_socket!.id})');
-        // rejoin các room đã join trước đó
         for (final r in _joinedRooms) {
-          _socket!.emit('join_room', {'roomId': r});
+          _socket!.emit('room:join', {'roomId': r});
         }
       })
-      ..onDisconnect((_) {
-        print('SocketManager: disconnected');
-      })
+      ..onDisconnect((_) => print('SocketManager: disconnected'))
       ..onConnectError((err) => print('SocketManager: connect error: $err'))
       ..onError((err) => print('SocketManager: error: $err'));
-
-    // đợi kết nối xong (option)
   }
 
   void disconnect() {
     _socket?.disconnect();
     _socket = null;
     _isConnecting = false;
-    // đóng các controllers
-    for (final c in _controllers.values) {
-      c.close();
-    }
+    for (final c in _controllers.values) c.close();
     _controllers.clear();
     _joinedRooms.clear();
   }
@@ -72,14 +60,14 @@ class SocketManager {
     }
   }
 
-  Future<dynamic> emitWithAck(String event, dynamic data, {Duration timeout = const Duration(seconds: 5)}) {
+  Future<dynamic> emitWithAck(String event, dynamic data,
+      {Duration timeout = const Duration(seconds: 5)}) {
     final completer = Completer<dynamic>();
     if (_socket?.connected == true) {
       try {
         _socket!.emitWithAck(event, data, ack: (response) {
           if (!completer.isCompleted) completer.complete(response);
         });
-        // timeout
         Future.delayed(timeout, () {
           if (!completer.isCompleted) completer.completeError('emitWithAck timeout');
         });
@@ -92,17 +80,12 @@ class SocketManager {
     return completer.future;
   }
 
-  /// Trả về stream cho event; tạo StreamController nếu chưa có
   Stream<dynamic> on(String eventName) {
-    if (_controllers.containsKey(eventName)) {
-      return _controllers[eventName]!.stream;
-    }
+    if (_controllers.containsKey(eventName)) return _controllers[eventName]!.stream;
 
-    final controller = StreamController<dynamic>.broadcast(onCancel: () {
-      // nếu ko còn listener nào, ta vẫn giữ controller để reuse (tuỳ chọn)
-    });
-
+    final controller = StreamController<dynamic>.broadcast();
     _controllers[eventName] = controller;
+
     _socket?.on(eventName, (data) {
       if (!controller.isClosed) controller.add(data);
     });
@@ -110,31 +93,41 @@ class SocketManager {
     return controller.stream;
   }
 
-  /// Hủy lắng nghe event ở phía client (xóa controller)
   void off(String eventName) {
     _socket?.off(eventName);
     final c = _controllers.remove(eventName);
     c?.close();
   }
 
-  /// Join room và lưu vào set _joinedRooms để rejoin khi reconnect
+  /// --- Join room ---
   Future<void> joinRoom(String roomId) async {
-    try {
-      final resp = await emitWithAck('join_room', {'roomId': roomId});
-      // server có thể trả { success: true }
-      if (resp != null && resp['success'] == true) {
-        _joinedRooms.add(roomId);
-      } else {
-        // nếu server trả khác thì vẫn add tuỳ logic bạn muốn
-      }
-    } catch (e) {
-      rethrow;
+    if (_socket?.connected == true) {
+      _socket!.emit('room:join', {'roomId': roomId});
+      _joinedRooms.add(roomId);
+      print('SocketManager: joined room $roomId');
+    } else {
+      print('SocketManager: cannot join room, socket not connected');
     }
   }
 
-  /// Leave room
+  /// --- Leave room ---
   void leaveRoom(String roomId) {
-    _socket?.emit('leave_room', {'roomId': roomId});
+    _socket?.emit('room:leave', {'roomId': roomId});
     _joinedRooms.remove(roomId);
+  }
+
+  void sendMessage(String roomId, Map<String, dynamic> message) {
+    emit('message:send', message); // <-- gửi event SEND
+  }
+
+  /// --- Lắng nghe message của 1 room ---
+  /// server phát lại cho room -> SOCKET_EVENTS.MESSAGE.RECEIVE
+  Stream<dynamic> onMessage(String roomId) {
+    return on('message:receive') // <-- lắng nghe event RECEIVE
+        .where((data) => data['roomId'] == roomId);
+  }
+
+  Stream<dynamic> onMessageStream() {
+    return on('message:receive');
   }
 }

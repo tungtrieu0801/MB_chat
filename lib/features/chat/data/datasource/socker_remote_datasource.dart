@@ -5,7 +5,7 @@ import '../../../../core/network/socket_manager.dart';
 abstract class SocketRemoteDataSource {
   Future<void> connect();
   Future<void> joinRoom(String roomId);
-  Future<void> sendMessage(String roomId, Map<String, dynamic> payload);
+  // Future<void> sendMessage(String roomId, Map<String, dynamic> payload);
   Stream<dynamic> onMessageReceived();
   void dispose();
 }
@@ -27,14 +27,14 @@ class SocketRemoteDataSourceImpl implements SocketRemoteDataSource {
     await _socketManager.joinRoom(roomId);
   }
 
-  @override
-  Future<void> sendMessage(String roomId, Map<String, dynamic> payload) async {
-    // dùng event name giống server: 'send_message'
-    _socketManager.emit('send_message', {
-      'roomId': roomId,
-      ...payload,
-    });
-  }
+  // @override
+  // Future<void> sendMessage(String roomId, Map<String, dynamic> payload) async {
+  //   // dùng event name giống server: 'send_message'
+  //   _socketManager.emit('send_message', {
+  //     'roomId': roomId,
+  //     ...payload,
+  //   });
+  // }
 
   @override
   Stream<dynamic> onMessageReceived() {

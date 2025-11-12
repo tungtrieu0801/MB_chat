@@ -16,11 +16,12 @@ void main() async {
   await di.init();
   final socketManager = di.sl<SocketManager>();
   socketManager.initAndConnect();
-  runApp(const MyApp());
+  runApp(MyApp(socketManager: socketManager));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final SocketManager socketManager;
+  const MyApp({super.key, required this.socketManager});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +31,7 @@ class MyApp extends StatelessWidget {
           create: (_) => AuthBloc(di.sl<LoginUsecase>()),
         ),
         BlocProvider(
-          create: (_) => ChatConversationBloc(),
+          create: (_) => ChatConversationBloc(socketManager: socketManager),
         ),
       ],
       child: ScreenUtilInit(

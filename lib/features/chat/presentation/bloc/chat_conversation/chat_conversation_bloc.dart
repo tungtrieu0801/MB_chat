@@ -1,35 +1,107 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mobile_trip_togethor/features/chat/domain/usecases/get_list_message_usecase.dart';
-import 'package:mobile_trip_togethor/features/chat/presentation/bloc/chat_conversation/chat_conversation_state.dart';
-import 'package:mobile_trip_togethor/features/chat/presentation/bloc/chat_conversation/chat_converstaion_event.dart';
-import '../../../../../core/di/injection_container.dart';
+import 'package:mobile_trip_togethor/core/network/socket_manager.dart';
+import 'chat_conversation_state.dart';
+import 'chat_converstaion_event.dart';
 
-class ChatConversationBloc extends Bloc<ChatConversationEvent, ChatConversationState> {
-  final GetListMessageUseCase _getListMessageUseCase = sl<GetListMessageUseCase>();
+class ChatConversationBloc
+    extends Bloc<ChatConversationEvent, ChatConversationState> {
+  final SocketManager socketManager;
+  final List<Message> _messages = [];
 
-  // Bạn có thể giữ socket connection ở đây
-  // late final ChatSocketClient _socketClient;
-
-  ChatConversationBloc() : super(ChatConversationInitial()) {
+  ChatConversationBloc({required this.socketManager})
+      : super(ChatConversationInitial()) {
     on<GetListMessageEvent>(_onGetMessages);
-    // on<NewMessageReceivedEvent>(_onNewMessageReceived);
+    on<JoinRoomEvent>(_onJoinRoom);
+    on<SendMessageEvent>(_onSendMessage);
+    on<ReceiveMessageEvent>(_onReceiveMessage);
   }
 
-  Future<void> _onGetMessages(GetListMessageEvent event, Emitter<ChatConversationState> emit) async {
+  void _onGetMessages(
+      GetListMessageEvent event, Emitter<ChatConversationState> emit) async {
     emit(ChatConversationLoading());
     try {
-      final messages = await _getListMessageUseCase.getListMessageInRoom(event.roomId);
-      emit(ChatConversationLoaded(messages));
+      // Nếu muốn load từ repo, có thể thêm ở đây
+      emit(ChatConversationLoaded(List.from(_messages)));
     } catch (e) {
       emit(ChatConversationError(e.toString()));
     }
   }
 
-// Future<void> _onNewMessageReceived(NewMessageReceivedEvent event, Emitter<ChatConversationState> emit) async {
-//   if (state is ChatConversationLoaded) {
-//     final updatedMessages = List.of((state as ChatConversationLoaded).messages)
-//       ..insert(0, event.message);
-//     emit(ChatConversationLoaded(updatedMessages));
-//   }
-// }
+  void _onJoinRoom(
+      JoinRoomEvent event, Emitter<ChatConversationState> emit) async {
+    try {
+      await socketManager.joinRoom(event.roomId);
+      // Lắng nghe message chỉ của room này
+      socketManager.onMessage(event.roomId).listen((data) {
+        add(ReceiveMessageEvent(data));
+      });
+      print('📩 Joined room: ${event.roomId}');
+    } catch (e) {
+      print('❌ Join room failed: $e');
+    }
+  }
+
+  void _onSendMessage(
+      SendMessageEvent event, Emitter<ChatConversationState> emit) {
+    final messageId = DateTime.now().millisecondsSinceEpoch.toString();
+
+    final message = Message(
+      id: messageId,
+      roomId: event.roomId,
+      senderId: 'me',
+      content: event.content,
+      createdAt: DateTime.now(),
+      status: MessageStatus.sending,
+    );
+
+    _messages.insert(0, message);
+    emit(ChatConversationLoaded(List.from(_messages)));
+
+
+    // Gửi lên server
+    socketManager.sendMessage(event.roomId, {
+      'id': messageId,
+      'roomId': event.roomId,
+      'senderId': 'me',
+      'content': event.content,
+      'createdAt': message.createdAt.toIso8601String(),
+    });
+  }
+
+
+  void _onReceiveMessage(
+      ReceiveMessageEvent event, Emitter<ChatConversationState> emit) {
+    final data = event.message;
+
+    // Tìm message đang gửi với cùng id, cập nhật content & status
+    final index = _messages.indexWhere((m) => m.id == data['id']);
+    if (index != -1) {
+      // Cập nhật tin nhắn client thành server said
+      _messages[index] = Message(
+        id: data['id'],
+        roomId: data['roomId'],
+        senderId: data['senderId'],
+        content: data['content'], // "server said: ..."
+        createdAt: DateTime.parse(data['createdAt']),
+        status: MessageStatus.sent,
+      );
+    } else {
+      // Tin nhắn mới từ server, insert bình thường
+      _messages.insert(
+        0,
+        Message(
+          id: data['id'],
+          roomId: data['roomId'],
+          senderId: data['senderId'],
+          content: data['content'],
+          createdAt: DateTime.parse(data['createdAt']),
+          status: MessageStatus.received,
+        ),
+      );
+    }
+
+    emit(ChatConversationLoaded(List.from(_messages)));
+  }
+
+
 }

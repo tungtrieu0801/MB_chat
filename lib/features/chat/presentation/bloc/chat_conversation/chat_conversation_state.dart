@@ -1,5 +1,22 @@
 import 'package:equatable/equatable.dart';
-import 'package:mobile_trip_togethor/features/chat/domain/entities/message.dart';
+enum MessageStatus { sending, sent, received }
+class Message {
+  final String id;
+  final String content;
+  final String roomId;
+  final String senderId;
+  final DateTime createdAt;
+  MessageStatus status;
+
+  Message({
+    required this.id,
+    required this.content,
+    required this.roomId,
+    required this.senderId,
+    required this.createdAt,
+    this.status = MessageStatus.sending, // default: đang gửi
+  });
+}
 
 abstract class ChatConversationState extends Equatable {
   const ChatConversationState();
