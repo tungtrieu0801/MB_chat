@@ -34,23 +34,4 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
-  /// Trả về profile đã lưu (nếu có) — null nếu chưa có
-  Future<User?> getCachedUser() async {
-    try {
-      return await localDataSource.getCachedUser();
-    } catch (e) {
-      // xử lý/ghi log nếu cần
-      return null;
-    }
-  }
-
-  /// Xóa cache profile (dùng cho logout)
-  Future<void> clearCache() async {
-    try {
-      await localDataSource.clearCache();
-    } catch (e) {
-      // xử lý/ghi log nếu cần
-      rethrow;
-    }
-  }
 }

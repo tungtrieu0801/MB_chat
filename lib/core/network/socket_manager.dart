@@ -130,4 +130,13 @@ class SocketManager {
   Stream<dynamic> onMessageStream() {
     return on('message:receive');
   }
+
+  void sendTyping(String roomId, String userId, bool isTyping) {
+    emit('message:typing', {'roomId': roomId, 'userId': userId, 'isTyping': isTyping});
+  }
+
+  Stream<dynamic> onTyping(String roomId) {
+    return on('message:typing').where((data) => data['roomId'] == roomId);
+  }
+
 }

@@ -32,11 +32,12 @@ class ChatConversationLoading extends ChatConversationState {}
 class ChatConversationLoaded extends ChatConversationState {
   final List<Message> messages;
   final String? currentUserId;
+  final Set<String> typingUserIds; // thêm trường này
 
-  const ChatConversationLoaded(this.messages, this.currentUserId);
+  const ChatConversationLoaded(this.messages, this.currentUserId, [this.typingUserIds = const {}]);
 
   @override
-  List<Object?> get props => [messages];
+  List<Object?> get props => [messages, typingUserIds];
 }
 
 class ChatConversationError extends ChatConversationState {

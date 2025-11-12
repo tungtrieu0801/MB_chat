@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_trip_togethor/core/network/socket_manager.dart';
 import 'package:mobile_trip_togethor/features/auth/domain/entities/user.dart';
-import 'package:mobile_trip_togethor/features/auth/domain/usecases/get_cache_user_usecase.dart';
+import 'package:mobile_trip_togethor/core/shared/usecases/get_cache_user_usecase.dart';
 import 'chat_conversation_state.dart';
 import 'chat_converstaion_event.dart';
 
@@ -18,6 +18,7 @@ class ChatConversationBloc
     on<JoinRoomEvent>(_onJoinRoom);
     on<SendMessageEvent>(_onSendMessage);
     on<ReceiveMessageEvent>(_onReceiveMessage);
+    on<UserTypingEvent>(_onUserTyping);
     _loadCachedUser();
   }
 
@@ -45,6 +46,9 @@ class ChatConversationBloc
       // Lắng nghe message chỉ của room này
       socketManager.onMessage(event.roomId).listen((data) {
         add(ReceiveMessageEvent(data));
+      });
+      socketManager.onTyping(event.roomId).listen((data) {
+        add(UserTypingEvent(data['userId'], data['isTyping']));
       });
       print('📩 Joined room: ${event.roomId}');
     } catch (e) {
@@ -113,4 +117,25 @@ class ChatConversationBloc
 
     emit(ChatConversationLoaded(List.from(_messages), _currentUser?.id));
   }
+
+  void _onUserTyping(UserTypingEvent event, Emitter<ChatConversationState> emit) {
+    if (state is ChatConversationLoaded) {
+      final currentState = state as ChatConversationLoaded;
+      final updatedTypingIds = Set<String>.from(currentState.typingUserIds);
+
+      if (event.isTyping) {
+        updatedTypingIds.add(event.userId);
+      } else {
+        updatedTypingIds.remove(event.userId);
+      }
+
+      emit(ChatConversationLoaded(
+        currentState.messages,
+        currentState.currentUserId,
+        updatedTypingIds,
+      ));
+    }
+  }
+
+
 }

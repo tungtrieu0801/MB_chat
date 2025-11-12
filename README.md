@@ -1,16 +1,8 @@
-# mobile_trip_togethor
-
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+# Clean architecture
+- Mục tiêu: áp dụng Nguyên lý đảo ngược phụ thuộc (DIP). Các lớp cấp cao như Usecase phải phụ thuộc
+- vào abstraction, không phải Implement/Data source.
+# DI (Service Locator như Getit)
+- Giúp đảm bảo Usecase nhận được interface chuẩn mà nó cần, không cần biết interface được triển khai
+- bởi lớp nào.
+- Giúp quản lý vòng đời của các đối tượng ở một nơi duy nhất init().
+- Mọi thứ cần được đăng kí ở một nơi tập trung.

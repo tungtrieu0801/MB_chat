@@ -1,8 +1,8 @@
+import 'package:mobile_trip_togethor/core/shared/repository/user_cache_repository.dart';
 import 'package:mobile_trip_togethor/features/auth/domain/entities/user.dart';
-import 'package:mobile_trip_togethor/features/auth/domain/repositories/auth_repository.dart';
 
 class GetCacheUserUseCase {
-  final AuthRepository repository;
+  final UserCacheRepository repository;
 
   GetCacheUserUseCase(this.repository);
 

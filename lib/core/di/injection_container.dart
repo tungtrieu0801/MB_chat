@@ -1,6 +1,8 @@
 import 'package:get_it/get_it.dart';
 import 'package:mobile_trip_togethor/core/network/socket_manager.dart';
-import 'package:mobile_trip_togethor/features/auth/domain/usecases/get_cache_user_usecase.dart';
+import 'package:mobile_trip_togethor/core/shared/repository/user_cache_repository.dart';
+import 'package:mobile_trip_togethor/core/shared/usecases/get_cache_user_usecase.dart';
+import 'package:mobile_trip_togethor/features/auth/data/repositories/user_cache_repository_impl.dart';
 import 'package:mobile_trip_togethor/features/chat/data/datasource/message_remote_datasource.dart';
 import 'package:mobile_trip_togethor/features/chat/data/datasource/room_remote_datasource.dart';
 import 'package:mobile_trip_togethor/features/chat/data/datasource/socker_remote_datasource.dart';
@@ -18,7 +20,7 @@ import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/domain/usecases/login_usecase.dart';
 
-final sl = GetIt.instance; // sl = Service Locator
+final sl = GetIt.instance;
 
 Future<void> init() async {
   // --- External ---
@@ -42,6 +44,9 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<MessageRepository>(
       () => MessageRepositoryImpl(sl()),
+  );
+  sl.registerLazySingleton<UserCacheRepository>(
+        () => UserCacheRepositoryImpl(sl()),
   );
 
   // --- Use cases ---

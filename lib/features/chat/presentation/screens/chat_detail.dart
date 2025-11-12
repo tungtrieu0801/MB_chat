@@ -137,13 +137,22 @@ class _ChatDetailState extends State<ChatDetail> {
                   return const Center(child: CircularProgressIndicator());
                 } else if (state is ChatConversationLoaded) {
                   final messages = state.messages;
-                  return ListView.builder(
-                    controller: _scrollController,
-                    reverse: true,
-                    itemCount: messages.length,
-                    itemBuilder: (context, index) {
-                      return _buildMessageItem(messages[index], state.currentUserId);
-                    },
+                  final typingUserIds = state.typingUserIds;
+
+                  return Column(
+                    children: [
+                      Expanded(
+                        child: ListView.builder(
+                          controller: _scrollController,
+                          reverse: true,
+                          itemCount: messages.length,
+                          itemBuilder: (context, index) {
+                            return _buildMessageItem(messages[index], state.currentUserId);
+                          },
+                        ),
+                      ),
+                      _buildTypingIndicator(typingUserIds, state.currentUserId),
+                    ],
                   );
                 } else if (state is ChatConversationError) {
                   return Center(child: Text('Error: ${state.message}'));
@@ -170,6 +179,20 @@ class _ChatDetailState extends State<ChatDetail> {
                         fillColor: Colors.grey[200],
                         filled: true,
                       ),
+                      onChanged: (text) {
+                        final state = context.read<ChatConversationBloc>().state;
+                        String? currentUserId;
+                        if (state is ChatConversationLoaded) {
+                          currentUserId = state.currentUserId;
+                        }
+
+                        if (currentUserId != null) {
+                          context.read<ChatConversationBloc>().add(
+                            UserTypingEvent(currentUserId, text.isNotEmpty),
+                          );
+                        }
+                      },
+
                       onSubmitted: (_) => _sendMessage(),
                     ),
                   ),
@@ -190,4 +213,19 @@ class _ChatDetailState extends State<ChatDetail> {
       ),
     );
   }
+
+  Widget _buildTypingIndicator(Set<String> typingUserIds, String? currentUserId) {
+    final otherUsers = typingUserIds.where((id) => id != currentUserId).toList();
+    if (otherUsers.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: Text(
+        '${otherUsers.join(', ')} đang nhập...',
+        style: const TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
+      ),
+    );
+  }
+
+
 }

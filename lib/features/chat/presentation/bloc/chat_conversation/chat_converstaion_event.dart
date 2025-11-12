@@ -44,3 +44,14 @@ class JoinRoomEvent extends ChatConversationEvent {
   @override
   List<Object?> get props => [roomId];
 }
+
+class UserTypingEvent extends ChatConversationEvent {
+  final String userId;
+  final bool isTyping;
+
+  UserTypingEvent(this.userId, this.isTyping);
+
+  @override
+  List<Object?> get props => [userId, isTyping];
+}
+

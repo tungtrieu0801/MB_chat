@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mobile_trip_togethor/core/network/socket_manager.dart';
-import 'package:mobile_trip_togethor/features/auth/domain/usecases/get_cache_user_usecase.dart';
+import 'package:mobile_trip_togethor/core/shared/usecases/get_cache_user_usecase.dart';
 import 'package:mobile_trip_togethor/features/chat/presentation/bloc/chat_conversation/chat_conversation_bloc.dart';
 
 import 'core/router/app_router.dart';
@@ -16,6 +16,8 @@ void main() async {
   // --- Khởi tạo Dependency Injection ---
   await di.init();
   final socketManager = di.sl<SocketManager>();
+
+  // Make sure socket init and connect before UI render.
   socketManager.initAndConnect();
   runApp(MyApp(socketManager: socketManager));
 }
