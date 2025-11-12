@@ -14,7 +14,7 @@ class Message {
     required this.roomId,
     required this.senderId,
     required this.createdAt,
-    this.status = MessageStatus.sending, // default: đang gửi
+    this.status = MessageStatus.sending,
   });
 }
 
@@ -31,8 +31,9 @@ class ChatConversationLoading extends ChatConversationState {}
 
 class ChatConversationLoaded extends ChatConversationState {
   final List<Message> messages;
+  final String? currentUserId;
 
-  const ChatConversationLoaded(this.messages);
+  const ChatConversationLoaded(this.messages, this.currentUserId);
 
   @override
   List<Object?> get props => [messages];

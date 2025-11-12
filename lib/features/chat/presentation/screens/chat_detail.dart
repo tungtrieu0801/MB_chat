@@ -46,41 +46,69 @@ class _ChatDetailState extends State<ChatDetail> {
     _controller.clear();
   }
 
-  Widget _buildMessageItem(Message message) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.grey[300],
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Expanded(child: Text(message.content)),
-          if (message.senderId == 'me')
-            Padding(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: () {
-                switch (message.status) {
-                  case MessageStatus.sending:
-                    return const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    );
-                  case MessageStatus.sent:
-                    return const Icon(Icons.check, size: 16, color: Colors.green);
-                  case MessageStatus.received:
-                    return const SizedBox.shrink();
-                }
-              }(),
+  Widget _buildMessageItem(Message message, String? currentUserId) {
+    final isMine = message.senderId == currentUserId;
+
+    return Align(
+      alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isMine ? Colors.blueAccent : Colors.grey[300],
+          borderRadius: BorderRadius.only(
+            topLeft: const Radius.circular(12),
+            topRight: const Radius.circular(12),
+            bottomLeft: isMine ? const Radius.circular(12) : const Radius.circular(0),
+            bottomRight: isMine ? const Radius.circular(0) : const Radius.circular(12),
+          ),
+        ),
+        constraints: const BoxConstraints(maxWidth: 280),
+        child: Column(
+          crossAxisAlignment:
+          isMine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          children: [
+            // ✅ ID hoặc tên người gửi nhỏ phía trên
+            Text(
+              message.senderId,
+              style: TextStyle(
+                fontSize: 10,
+                color: isMine ? Colors.white70 : Colors.black54,
+              ),
             ),
-        ],
+            const SizedBox(height: 4),
+            // Nội dung tin nhắn
+            Text(
+              message.content,
+              style: TextStyle(
+                color: isMine ? Colors.white : Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 4),
+            // Status icon nếu là tin nhắn của mình
+            if (isMine)
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  if (message.status == MessageStatus.sending)
+                    const SizedBox(
+                      width: 12,
+                      height: 12,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  else if (message.status == MessageStatus.sent)
+                    const Icon(Icons.check, size: 14, color: Colors.white70),
+                ],
+              ),
+          ],
+        ),
       ),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -114,7 +142,7 @@ class _ChatDetailState extends State<ChatDetail> {
                     reverse: true,
                     itemCount: messages.length,
                     itemBuilder: (context, index) {
-                      return _buildMessageItem(messages[index]);
+                      return _buildMessageItem(messages[index], state.currentUserId);
                     },
                   );
                 } else if (state is ChatConversationError) {

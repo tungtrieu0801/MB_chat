@@ -1,19 +1,30 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_trip_togethor/core/network/socket_manager.dart';
+import 'package:mobile_trip_togethor/features/auth/domain/entities/user.dart';
+import 'package:mobile_trip_togethor/features/auth/domain/usecases/get_cache_user_usecase.dart';
 import 'chat_conversation_state.dart';
 import 'chat_converstaion_event.dart';
 
 class ChatConversationBloc
     extends Bloc<ChatConversationEvent, ChatConversationState> {
+  final GetCacheUserUseCase getCacheUserUseCase;
   final SocketManager socketManager;
   final List<Message> _messages = [];
+  User? _currentUser;
 
-  ChatConversationBloc({required this.socketManager})
+  ChatConversationBloc({required this.socketManager, required this.getCacheUserUseCase})
       : super(ChatConversationInitial()) {
     on<GetListMessageEvent>(_onGetMessages);
     on<JoinRoomEvent>(_onJoinRoom);
     on<SendMessageEvent>(_onSendMessage);
     on<ReceiveMessageEvent>(_onReceiveMessage);
+    _loadCachedUser();
+  }
+
+  Future<void> _loadCachedUser() async {
+    final result = await getCacheUserUseCase.call();
+    _currentUser = result;
+    print('Current user: ${_currentUser?.id}');
   }
 
   void _onGetMessages(
@@ -21,7 +32,7 @@ class ChatConversationBloc
     emit(ChatConversationLoading());
     try {
       // Nếu muốn load từ repo, có thể thêm ở đây
-      emit(ChatConversationLoaded(List.from(_messages)));
+      emit(ChatConversationLoaded(List.from(_messages), _currentUser?.id));
     } catch (e) {
       emit(ChatConversationError(e.toString()));
     }
@@ -48,21 +59,21 @@ class ChatConversationBloc
     final message = Message(
       id: messageId,
       roomId: event.roomId,
-      senderId: 'me',
+      senderId: _currentUser!.id,
       content: event.content,
       createdAt: DateTime.now(),
       status: MessageStatus.sending,
     );
 
     _messages.insert(0, message);
-    emit(ChatConversationLoaded(List.from(_messages)));
+    emit(ChatConversationLoaded(List.from(_messages), _currentUser?.id));
 
 
     // Gửi lên server
     socketManager.sendMessage(event.roomId, {
       'id': messageId,
       'roomId': event.roomId,
-      'senderId': 'me',
+      'senderId': _currentUser?.id,
       'content': event.content,
       'createdAt': message.createdAt.toIso8601String(),
     });
@@ -100,8 +111,6 @@ class ChatConversationBloc
       );
     }
 
-    emit(ChatConversationLoaded(List.from(_messages)));
+    emit(ChatConversationLoaded(List.from(_messages), _currentUser?.id));
   }
-
-
 }

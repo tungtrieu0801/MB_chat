@@ -1,5 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:mobile_trip_togethor/core/network/socket_manager.dart';
+import 'package:mobile_trip_togethor/features/auth/domain/usecases/get_cache_user_usecase.dart';
 import 'package:mobile_trip_togethor/features/chat/data/datasource/message_remote_datasource.dart';
 import 'package:mobile_trip_togethor/features/chat/data/datasource/room_remote_datasource.dart';
 import 'package:mobile_trip_togethor/features/chat/data/datasource/socker_remote_datasource.dart';
@@ -47,6 +48,7 @@ Future<void> init() async {
   sl.registerLazySingleton<LoginUsecase>(() => LoginUsecase(sl()));
   sl.registerLazySingleton<GetListRoomUseCase>(() => GetListRoomUseCase(sl()));
   sl.registerLazySingleton<GetListMessageUseCase>(() => GetListMessageUseCase(sl()));
+  sl.registerLazySingleton<GetCacheUserUseCase>(() => GetCacheUserUseCase(sl()));
 
   // Socket manager singleton
   sl.registerLazySingleton<SocketManager>(() => SocketManager());
