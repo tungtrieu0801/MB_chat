@@ -1,18 +1,21 @@
 import 'reaction.dart';
 
+enum MessageStatus { sending, sent, received }
+
 class Message {
   final String id;
   final String roomId;
   final String senderId;
   final String content;
   final String type;
-  final List<String> mentionedUserIds;
+  final List mentionedUserIds;
   final bool isPinned;
   final bool isEdited;
   final bool isDeleted;
-  final List<Reaction> reactions;
+  final List reactions;
   final DateTime createdAt;
   final DateTime updatedAt;
+  MessageStatus status;
 
   Message({
     required this.id,
@@ -27,5 +30,6 @@ class Message {
     required this.reactions,
     required this.createdAt,
     required this.updatedAt,
+    this.status = MessageStatus.sending,
   });
 }

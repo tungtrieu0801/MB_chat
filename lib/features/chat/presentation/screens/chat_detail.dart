@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mobile_trip_togethor/features/chat/domain/entities/message.dart';
 import 'package:mobile_trip_togethor/features/chat/presentation/bloc/chat_conversation/chat_conversation_bloc.dart';
 import 'package:mobile_trip_togethor/features/chat/presentation/bloc/chat_conversation/chat_conversation_state.dart';
 import 'package:mobile_trip_togethor/features/chat/presentation/bloc/chat_conversation/chat_converstaion_event.dart';
@@ -20,11 +21,7 @@ class _ChatDetailState extends State<ChatDetail> {
   void initState() {
     super.initState();
     final bloc = context.read<ChatConversationBloc>();
-
-    // 1️⃣ Join room
     bloc.add(JoinRoomEvent(widget.roomId));
-
-    // 2️⃣ Load message
     bloc.add(GetListMessageEvent(widget.roomId));
   }
 
@@ -44,11 +41,30 @@ class _ChatDetailState extends State<ChatDetail> {
     );
 
     _controller.clear();
+    _scrollToBottom(); // scroll ngay sau khi gửi
+  }
+
+  /// Scroll an toàn xuống cuối list
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients &&
+          _scrollController.positions.isNotEmpty) {
+        try {
+          _scrollController.animateTo(
+            0,
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOut,
+          );
+        } catch (_) {
+          // fallback khi animateTo crash
+          _scrollController.jumpTo(0);
+        }
+      }
+    });
   }
 
   Widget _buildMessageItem(Message message, String? currentUserId) {
     final isMine = message.senderId == currentUserId;
-
     return Align(
       alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
@@ -65,10 +81,8 @@ class _ChatDetailState extends State<ChatDetail> {
         ),
         constraints: const BoxConstraints(maxWidth: 280),
         child: Column(
-          crossAxisAlignment:
-          isMine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          crossAxisAlignment: isMine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
-            // ✅ ID hoặc tên người gửi nhỏ phía trên
             Text(
               message.senderId,
               style: TextStyle(
@@ -77,15 +91,11 @@ class _ChatDetailState extends State<ChatDetail> {
               ),
             ),
             const SizedBox(height: 4),
-            // Nội dung tin nhắn
             Text(
               message.content,
-              style: TextStyle(
-                color: isMine ? Colors.white : Colors.black87,
-              ),
+              style: TextStyle(color: isMine ? Colors.white : Colors.black87),
             ),
             const SizedBox(height: 4),
-            // Status icon nếu là tin nhắn của mình
             if (isMine)
               Row(
                 mainAxisSize: MainAxisSize.min,
@@ -120,16 +130,7 @@ class _ChatDetailState extends State<ChatDetail> {
             child: BlocConsumer<ChatConversationBloc, ChatConversationState>(
               listener: (context, state) {
                 if (state is ChatConversationLoaded) {
-                  // Cuộn xuống khi có tin nhắn mới
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (_scrollController.hasClients) {
-                      _scrollController.animateTo(
-                        0,
-                        duration: const Duration(milliseconds: 200),
-                        curve: Curves.easeOut,
-                      );
-                    }
-                  });
+                  _scrollToBottom();
                 }
               },
               builder: (context, state) {
@@ -192,7 +193,6 @@ class _ChatDetailState extends State<ChatDetail> {
                           );
                         }
                       },
-
                       onSubmitted: (_) => _sendMessage(),
                     ),
                   ),
@@ -226,6 +226,5 @@ class _ChatDetailState extends State<ChatDetail> {
       ),
     );
   }
-
-
 }
+

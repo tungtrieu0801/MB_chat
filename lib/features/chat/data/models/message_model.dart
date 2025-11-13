@@ -1,3 +1,4 @@
+import '../../domain/entities/message.dart';
 import 'reaction_model.dart';
 
 class MessageModel {
@@ -10,7 +11,7 @@ class MessageModel {
   final bool isPinned;
   final bool isEdited;
   final bool isDeleted;
-  final List<Reaction> reactions;
+  final List reactions;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -40,9 +41,7 @@ class MessageModel {
       isPinned: json['isPinned'] ?? false,
       isEdited: json['isEdited'] ?? false,
       isDeleted: json['isDeleted'] ?? false,
-      reactions: (json['reactions'] as List<dynamic>? ?? [])
-          .map((e) => Reaction.fromJson(e))
-          .toList(),
+      reactions: json['reaction'],
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: DateTime.parse(json['updated_at']),
     );
@@ -59,9 +58,27 @@ class MessageModel {
       'isPinned': isPinned,
       'isEdited': isEdited,
       'isDeleted': isDeleted,
-      'reactions': reactions.map((e) => e.toJson()).toList(),
+      'reactions': reactions,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
     };
+  }
+
+  Message toEntity() {
+    return Message(
+      id: id,
+      roomId: roomId,
+      senderId: senderId,
+      content: content,
+      type: type,
+      mentionedUserIds: mentionedUserIds,
+      isPinned: isPinned,
+      isEdited: isEdited,
+      isDeleted: isDeleted,
+      reactions: reactions,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      status: MessageStatus.sent,
+    );
   }
 }

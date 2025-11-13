@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_trip_togethor/core/network/socket_manager.dart';
 import 'package:mobile_trip_togethor/features/auth/domain/entities/user.dart';
 import 'package:mobile_trip_togethor/core/shared/usecases/get_cache_user_usecase.dart';
+import 'package:mobile_trip_togethor/features/chat/domain/entities/message.dart';
 import 'chat_conversation_state.dart';
 import 'chat_converstaion_event.dart';
 
@@ -65,7 +66,14 @@ class ChatConversationBloc
       roomId: event.roomId,
       senderId: _currentUser!.id,
       content: event.content,
+      type: 'text',
+      mentionedUserIds: [],
+      isPinned: false,
+      isEdited: false,
+      isDeleted: false,
+      reactions: [],
       createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
       status: MessageStatus.sending,
     );
 
@@ -79,6 +87,13 @@ class ChatConversationBloc
       'roomId': event.roomId,
       'senderId': _currentUser?.id,
       'content': event.content,
+      'type': 'text',
+      'mentionedUserIds': [],
+      'isPinned': false,
+      'isEdited': false,
+      'isDeleted': false,
+      'reactions': [],
+      'updatedAt': message.updatedAt.toIso8601String(),
       'createdAt': message.createdAt.toIso8601String(),
     });
   }
@@ -96,8 +111,15 @@ class ChatConversationBloc
         id: data['id'],
         roomId: data['roomId'],
         senderId: data['senderId'],
-        content: data['content'], // "server said: ..."
+        content: data['content'],
+        type: 'text',
+        mentionedUserIds: [],
+        isPinned: false,
+        isEdited: false,
+        isDeleted: false,
+        reactions: [],
         createdAt: DateTime.parse(data['createdAt']),
+        updatedAt: DateTime.parse(data['updatedAt']),
         status: MessageStatus.sent,
       );
     } else {
@@ -109,6 +131,13 @@ class ChatConversationBloc
           roomId: data['roomId'],
           senderId: data['senderId'],
           content: data['content'],
+          type: 'text',
+          mentionedUserIds: [],
+          isPinned: false,
+          isEdited: false,
+          isDeleted: false,
+          reactions: [],
+          updatedAt: DateTime.parse(data['updatedAt']),
           createdAt: DateTime.parse(data['createdAt']),
           status: MessageStatus.received,
         ),

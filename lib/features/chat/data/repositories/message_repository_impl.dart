@@ -25,10 +25,11 @@ class MessageRepositoryImpl implements MessageRepository {
           isPinned: model.isPinned,
           isEdited: model.isEdited,
           isDeleted: model.isDeleted,
-          reactions: model.reactions.map((r) => Reaction(
-            userId: r.userId,
-            emoji: r.emoji,
-          )).toList(),
+          // reactions: model.reactions.map((r) => Reaction(
+          //   userId: r.userId,
+          //   emoji: r.emoji,
+          // )).toList(),
+          reactions: model.reactions,
           createdAt: model.createdAt,
           updatedAt: model.updatedAt,
         );
