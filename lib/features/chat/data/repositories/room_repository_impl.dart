@@ -27,6 +27,7 @@ class RoomRepositoryImpl implements RoomRepository {
           pinnedBy: model.pinnedBy,
           unreadCounts: model.unreadCounts,
           status: model.status,
+          lastOnlineAt: model.lastOnlineAt,
         );
       }).toList();
 

@@ -9,6 +9,7 @@ import 'core/router/app_router.dart';
 import 'core/di/injection_container.dart' as di;
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/domain/usecases/login_usecase.dart';
+import 'features/chat/presentation/bloc/video_call/video_call_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

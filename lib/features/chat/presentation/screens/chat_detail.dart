@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mobile_trip_togethor/features/chat/domain/entities/message.dart';
+import 'package:mobile_trip_togethor/features/chat/domain/entities/room.dart';
 import 'package:mobile_trip_togethor/features/chat/presentation/bloc/chat_conversation/chat_conversation_bloc.dart';
 import 'package:mobile_trip_togethor/features/chat/presentation/bloc/chat_conversation/chat_conversation_state.dart';
 import 'package:mobile_trip_togethor/features/chat/presentation/bloc/chat_conversation/chat_converstaion_event.dart';
 
+import '../bloc/video_call/video_call_bloc.dart';
+import '../bloc/video_call/video_call_event.dart';
+
 class ChatDetail extends StatefulWidget {
-  final String roomId;
-  const ChatDetail({super.key, required this.roomId});
+  final Room room;
+  const ChatDetail({super.key, required this.room});
 
   @override
   State<ChatDetail> createState() => _ChatDetailState();
@@ -21,8 +26,8 @@ class _ChatDetailState extends State<ChatDetail> {
   void initState() {
     super.initState();
     final bloc = context.read<ChatConversationBloc>();
-    bloc.add(JoinRoomEvent(widget.roomId));
-    bloc.add(GetListMessageEvent(widget.roomId));
+    bloc.add(JoinRoomEvent(widget.room.id));
+    bloc.add(GetListMessageEvent(widget.room.id));
   }
 
   @override
@@ -37,7 +42,7 @@ class _ChatDetailState extends State<ChatDetail> {
     if (text.isEmpty) return;
 
     context.read<ChatConversationBloc>().add(
-      SendMessageEvent(roomId: widget.roomId, content: text),
+      SendMessageEvent(roomId: widget.room.id, content: text),
     );
 
     _controller.clear();
@@ -123,7 +128,44 @@ class _ChatDetailState extends State<ChatDetail> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Phòng chat ${widget.roomId}')),
+      appBar: AppBar(
+          title: Column(
+            children: [
+              Text(widget.room.name),
+              Text('Hoạt động ${widget.room.lastOnlineAt}')
+            ],
+          ),
+        actions: [
+          IconButton(icon: Icon(Icons.call), onPressed: () {
+            context.go('/phone-call');
+          },),
+          IconButton(
+            icon: Icon(Icons.video_call),
+            onPressed: () async {
+              final peerId = "id_của_người_bên_đó"; // lấy từ room/member
+              final callBloc = context.read<CallBloc>();
+
+              // 1. Tạo offer từ WebRTC PeerConnection
+              final offer = await callBloc.createOffer();
+
+              // 2. Gửi event CallMakeEvent tới Bloc
+              callBloc.add(CallMakeEvent(
+                peerId: peerId,
+                peerName: "Tên người nhận",
+                peerAvatar: "URL avatar nếu có",
+                sdpOffer: offer,
+              ));
+
+              // 3. Chuyển sang màn VideoCallScreen
+              context.go('/video-call');
+            },
+          ),
+
+          IconButton(icon: Icon(Icons.more_horiz), onPressed: () {
+
+          })
+        ],
+      ),
       body: Column(
         children: [
           Expanded(

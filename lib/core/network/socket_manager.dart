@@ -139,4 +139,37 @@ class SocketManager {
     return on('message:typing').where((data) => data['roomId'] == roomId);
   }
 
+  /// Call signaling
+  void sendCallOffer(String toUserId, dynamic sdp) {
+    emit('call:offer', {'toUserId': toUserId, 'sdp': sdp});
+  }
+
+  Stream<dynamic> onCallOffer() {
+    return on('call:offer');
+  }
+
+  void sendCallAnswer(String toUserId, dynamic sdp) {
+    emit('call:answer', {'toUserId': toUserId, 'sdp': sdp});
+  }
+
+  Stream<dynamic> onCallAnswer() {
+    return on('call:answer');
+  }
+
+  void sendCallIce(String toUserId, dynamic candidate) {
+    emit('call:ice', {'toUserId': toUserId, 'candidate': candidate});
+  }
+
+  Stream<dynamic> onCallIce() {
+    return on('call:ice');
+  }
+
+  void sendCallHangup(String toUserId) {
+    emit('call:hangup', {'toUserId': toUserId});
+  }
+
+  Stream<dynamic> onCallHangup() {
+    return on('call:hangup');
+  }
+
 }

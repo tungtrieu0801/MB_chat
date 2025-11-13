@@ -12,6 +12,7 @@ class ChatRoomModel {
   final List<String> pinnedBy;
   final Map<String, int> unreadCounts;
   final String status;
+  final DateTime? lastOnlineAt;
 
   ChatRoomModel({
     required this.id,
@@ -27,6 +28,7 @@ class ChatRoomModel {
     required this.pinnedBy,
     required this.unreadCounts,
     required this.status,
+    required this.lastOnlineAt,
   });
 
   factory ChatRoomModel.fromJson(Map<String, dynamic> json) {
@@ -46,6 +48,9 @@ class ChatRoomModel {
       pinnedBy: List<String>.from(json['pinnedBy'] ?? []),
       unreadCounts: Map<String, int>.from(json['unreadCounts'] ?? {}),
       status: json['status'] as String? ?? 'active',
+      lastOnlineAt: json['lastOnlineAt'] != null
+          ? DateTime.parse(json['lastOnlineAt'])
+          : null
     );
   }
 
@@ -64,6 +69,7 @@ class ChatRoomModel {
       'pinnedBy': pinnedBy,
       'unreadCounts': unreadCounts,
       'status': status,
+      'lastOnlineAt': lastOnlineAt?.toIso8601String(),
     };
   }
 }

@@ -12,6 +12,7 @@ class Room {
   final List<String> pinnedBy;
   final Map<String, int> unreadCounts;
   final String status;
+  final DateTime? lastOnlineAt;
 
   const Room({
     required this.id,
@@ -27,5 +28,6 @@ class Room {
     required this.pinnedBy,
     required this.unreadCounts,
     required this.status,
+    required this.lastOnlineAt
   });
 }

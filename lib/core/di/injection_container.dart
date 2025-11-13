@@ -61,5 +61,5 @@ Future<void> init() async {
   sl.registerLazySingleton<SocketManager>(() => SocketManager());
 
   // Socket remote datasource
-  sl.registerLazySingleton<SocketRemoteDataSource>(() => SocketRemoteDataSourceImpl(sl()));
+  sl.registerLazySingleton<SocketRemoteDataSource>(() => SocketRemoteDataSourceImpl(sl(), sl()));
 }

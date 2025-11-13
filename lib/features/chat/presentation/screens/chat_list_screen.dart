@@ -132,7 +132,7 @@ class ChatScreenContent extends StatelessWidget {
                             ],
                           ),
                           onTap: () {
-                            context.push('/chat/${room.id}');
+                            context.push('/chat/${room.id}', extra: room);
                           },
                         );
                       },

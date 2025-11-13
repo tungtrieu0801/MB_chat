@@ -44,6 +44,7 @@ dependencies:
   pretty_qr_code: ^3.5.0
   get_it: ^9.0.5
   socket_io_client: ^3.1.2
+  flutter_webrtc: ^1.2.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
