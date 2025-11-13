@@ -2,6 +2,7 @@ import 'package:get_it/get_it.dart';
 import 'package:mobile_trip_togethor/core/network/socket_manager.dart';
 import 'package:mobile_trip_togethor/core/shared/repository/user_cache_repository.dart';
 import 'package:mobile_trip_togethor/core/shared/usecases/get_cache_user_usecase.dart';
+import 'package:mobile_trip_togethor/features/auth/data/datasources/impl/auth_remote_datasource_impl.dart';
 import 'package:mobile_trip_togethor/features/auth/data/repositories/user_cache_repository_impl.dart';
 import 'package:mobile_trip_togethor/features/chat/data/datasource/message_remote_datasource.dart';
 import 'package:mobile_trip_togethor/features/chat/data/datasource/room_remote_datasource.dart';
@@ -16,6 +17,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../features/auth/data/datasources/auth_local_data_source.dart';
 import '../../features/auth/data/datasources/auth_remote_data_source.dart';
+import '../../features/auth/data/datasources/impl/auth_local_datasource_impl.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/domain/usecases/login_usecase.dart';
@@ -28,7 +30,7 @@ Future<void> init() async {
   sl.registerLazySingleton<SharedPreferences>(() => prefs);
 
   // --- Data sources ---
-  sl.registerLazySingleton<AuthRemoteDataSource>(() => AuthRemoteDataSource());
+  sl.registerLazySingleton<AuthRemoteDataSource>(() => AuthRemoteDataSourceImpl());
   sl.registerLazySingleton<AuthLocalDataSource>(
         () => AuthLocalDataSourceImpl(sl()),
   );
