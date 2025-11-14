@@ -33,3 +33,28 @@ class Message {
     this.status = MessageStatus.sending,
   });
 }
+// --- Extension copyWith ---
+extension MessageCopy on Message {
+  Message copyWith({
+    List<String>? reactions,
+    MessageStatus? status,
+    String? content,
+    DateTime? updatedAt,
+  }) {
+    return Message(
+      id: id,
+      roomId: roomId,
+      senderId: senderId,
+      content: content ?? this.content,
+      type: type,
+      mentionedUserIds: mentionedUserIds,
+      isPinned: isPinned,
+      isEdited: isEdited,
+      isDeleted: isDeleted,
+      reactions: reactions ?? this.reactions,
+      createdAt: createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      status: status ?? this.status,
+    );
+  }
+}

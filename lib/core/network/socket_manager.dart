@@ -127,6 +127,14 @@ class SocketManager {
     return on('message:receive') // <-- lắng nghe event RECEIVE
         .where((data) => data['roomId'] == roomId);
   }
+  
+  void reactMessage(String roomId, Map<String, dynamic> data) {
+    emit('message:react', data);
+  }
+
+  Stream<dynamic> onMessageReactedStream(String roomId) {
+    return on('message:reacted').where((data) => data['roomId'] == roomId);
+  }
 
   Stream<dynamic> onMessageStream() {
     return on('message:receive');

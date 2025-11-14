@@ -9,7 +9,6 @@ abstract class ChatConversationEvent extends Equatable {
 
 class GetListMessageEvent extends ChatConversationEvent {
   final String roomId;
-
   const GetListMessageEvent(this.roomId);
 
   @override
@@ -19,15 +18,12 @@ class GetListMessageEvent extends ChatConversationEvent {
 class SendMessageEvent extends ChatConversationEvent {
   final String roomId;
   final String content;
-
-  const SendMessageEvent({
-    required this.roomId,
-    required this.content,
-  });
+  const SendMessageEvent({required this.roomId, required this.content});
 
   @override
   List<Object?> get props => [roomId, content];
 }
+
 class ReceiveMessageEvent extends ChatConversationEvent {
   final Map<String, dynamic> message;
   const ReceiveMessageEvent(this.message);
@@ -36,7 +32,6 @@ class ReceiveMessageEvent extends ChatConversationEvent {
   List<Object?> get props => [message];
 }
 
-// Join room socket
 class JoinRoomEvent extends ChatConversationEvent {
   final String roomId;
   const JoinRoomEvent(this.roomId);
@@ -48,10 +43,33 @@ class JoinRoomEvent extends ChatConversationEvent {
 class UserTypingEvent extends ChatConversationEvent {
   final String userId;
   final bool isTyping;
-
-  UserTypingEvent(this.userId, this.isTyping);
+  const UserTypingEvent(this.userId, this.isTyping);
 
   @override
   List<Object?> get props => [userId, isTyping];
 }
 
+// ---------------- Reaction ----------------
+class ReactMessageEvent extends ChatConversationEvent {
+  final String roomId;
+  final String messageId;
+  final String reaction;
+  final bool fromServer;
+  const ReactMessageEvent({
+    required this.roomId,
+    required this.messageId,
+    required this.reaction,
+    this.fromServer = false, // <-- mới
+  });
+
+  @override
+  List<Object?> get props => [roomId, messageId, reaction];
+}
+
+class ReceiveMessageReactedEvent extends ChatConversationEvent {
+  final Map<String, dynamic> data;
+  const ReceiveMessageReactedEvent(this.data);
+
+  @override
+  List<Object?> get props => [data];
+}

@@ -46,14 +46,33 @@ class _ChatDetailState extends State<ChatDetail> {
     );
 
     _controller.clear();
-    _scrollToBottom(); // scroll ngay sau khi gửi
+    _scrollToBottom();
   }
 
-  /// Scroll an toàn xuống cuối list
+  void _showReactMenu(Message message) async {
+    final selected = await showMenu<String>(
+      context: context,
+      position: RelativeRect.fromLTRB(100, 100, 100, 100),
+      items: const [
+        PopupMenuItem(value: '❤️', child: Text('❤️')),
+        PopupMenuItem(value: '😂', child: Text('😂')),
+        PopupMenuItem(value: '👍', child: Text('👍')),
+        PopupMenuItem(value: '😮', child: Text('😮')),
+        PopupMenuItem(value: '😢', child: Text('😢')),
+        PopupMenuItem(value: '👎', child: Text('👎')),
+      ],
+    );
+
+    if (selected != null) {
+      context.read<ChatConversationBloc>().add(
+        ReactMessageEvent(roomId: widget.room.id, messageId: message.id, reaction: selected),
+      );
+    }
+  }
+
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients &&
-          _scrollController.positions.isNotEmpty) {
+      if (_scrollController.hasClients && _scrollController.positions.isNotEmpty) {
         try {
           _scrollController.animateTo(
             0,
@@ -61,7 +80,6 @@ class _ChatDetailState extends State<ChatDetail> {
             curve: Curves.easeOut,
           );
         } catch (_) {
-          // fallback khi animateTo crash
           _scrollController.jumpTo(0);
         }
       }
@@ -70,56 +88,73 @@ class _ChatDetailState extends State<ChatDetail> {
 
   Widget _buildMessageItem(Message message, String? currentUserId) {
     final isMine = message.senderId == currentUserId;
-    return Align(
-      alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: isMine ? Colors.blueAccent : Colors.grey[300],
-          borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(12),
-            topRight: const Radius.circular(12),
-            bottomLeft: isMine ? const Radius.circular(12) : const Radius.circular(0),
-            bottomRight: isMine ? const Radius.circular(0) : const Radius.circular(12),
+
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onLongPress: () => _showReactMenu(message),
+        child: Align(
+          alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
+          child: Container(
+            margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: isMine ? Colors.blueAccent : Colors.grey[300],
+              borderRadius: BorderRadius.only(
+                topLeft: const Radius.circular(12),
+                topRight: const Radius.circular(12),
+                bottomLeft: isMine ? const Radius.circular(12) : const Radius.circular(0),
+                bottomRight: isMine ? const Radius.circular(0) : const Radius.circular(12),
+              ),
+            ),
+            constraints: const BoxConstraints(maxWidth: 280),
+            child: Column(
+              crossAxisAlignment:
+              isMine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+              children: [
+                Text(
+                  message.senderId,
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: isMine ? Colors.white70 : Colors.black54,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  message.content,
+                  style: TextStyle(color: isMine ? Colors.white : Colors.black87),
+                ),
+                const SizedBox(height: 4),
+                if (isMine)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      if (message.status == MessageStatus.sending)
+                        const SizedBox(
+                          width: 12,
+                          height: 12,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      else if (message.status == MessageStatus.sent)
+                        const Icon(Icons.check, size: 14, color: Colors.white70),
+                    ],
+                  ),
+                if (message.reactions.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Wrap(
+                      spacing: 4,
+                      children:
+                      message.reactions.map((r) => Text(r, style: const TextStyle(fontSize: 14))).toList(),
+                    ),
+                  ),
+              ],
+            ),
           ),
-        ),
-        constraints: const BoxConstraints(maxWidth: 280),
-        child: Column(
-          crossAxisAlignment: isMine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-          children: [
-            Text(
-              message.senderId,
-              style: TextStyle(
-                fontSize: 10,
-                color: isMine ? Colors.white70 : Colors.black54,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              message.content,
-              style: TextStyle(color: isMine ? Colors.white : Colors.black87),
-            ),
-            const SizedBox(height: 4),
-            if (isMine)
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  if (message.status == MessageStatus.sending)
-                    const SizedBox(
-                      width: 12,
-                      height: 12,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  else if (message.status == MessageStatus.sent)
-                    const Icon(Icons.check, size: 14, color: Colors.white70),
-                ],
-              ),
-          ],
         ),
       ),
     );
@@ -129,41 +164,19 @@ class _ChatDetailState extends State<ChatDetail> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: Column(
-            children: [
-              Text(widget.room.name),
-              Text('Hoạt động ${widget.room.lastOnlineAt}')
-            ],
-          ),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(widget.room.name),
+            Text(
+              'Hoạt động ${widget.room.lastOnlineAt}',
+              style: const TextStyle(fontSize: 12),
+            ),
+          ],
+        ),
         actions: [
-          IconButton(icon: Icon(Icons.call), onPressed: () {
-            context.go('/phone-call');
-          },),
-          IconButton(
-            icon: Icon(Icons.video_call),
-            onPressed: () async {
-              final peerId = "id_của_người_bên_đó"; // lấy từ room/member
-              final callBloc = context.read<CallBloc>();
-
-              // 1. Tạo offer từ WebRTC PeerConnection
-              final offer = await callBloc.createOffer();
-
-              // 2. Gửi event CallMakeEvent tới Bloc
-              callBloc.add(CallMakeEvent(
-                peerId: peerId,
-                peerName: "Tên người nhận",
-                peerAvatar: "URL avatar nếu có",
-                sdpOffer: offer,
-              ));
-
-              // 3. Chuyển sang màn VideoCallScreen
-              context.go('/video-call');
-            },
-          ),
-
-          IconButton(icon: Icon(Icons.more_horiz), onPressed: () {
-
-          })
+          IconButton(icon: const Icon(Icons.call), onPressed: () {}),
+          IconButton(icon: const Icon(Icons.video_call), onPressed: () {}),
         ],
       ),
       body: Column(
@@ -171,9 +184,7 @@ class _ChatDetailState extends State<ChatDetail> {
           Expanded(
             child: BlocConsumer<ChatConversationBloc, ChatConversationState>(
               listener: (context, state) {
-                if (state is ChatConversationLoaded) {
-                  _scrollToBottom();
-                }
+                if (state is ChatConversationLoaded) _scrollToBottom();
               },
               builder: (context, state) {
                 if (state is ChatConversationLoading) {
@@ -189,9 +200,8 @@ class _ChatDetailState extends State<ChatDetail> {
                           controller: _scrollController,
                           reverse: true,
                           itemCount: messages.length,
-                          itemBuilder: (context, index) {
-                            return _buildMessageItem(messages[index], state.currentUserId);
-                          },
+                          itemBuilder: (context, index) =>
+                              _buildMessageItem(messages[index], state.currentUserId),
                         ),
                       ),
                       _buildTypingIndicator(typingUserIds, state.currentUserId),
@@ -269,4 +279,3 @@ class _ChatDetailState extends State<ChatDetail> {
     );
   }
 }
-

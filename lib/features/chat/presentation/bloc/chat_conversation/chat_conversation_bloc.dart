@@ -1,71 +1,81 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_trip_togethor/core/network/socket_manager.dart';
-import 'package:mobile_trip_togethor/features/auth/domain/entities/user.dart';
-import 'package:mobile_trip_togethor/core/shared/usecases/get_cache_user_usecase.dart';
 import 'package:mobile_trip_togethor/features/chat/domain/entities/message.dart';
-import 'chat_conversation_state.dart';
+import 'package:mobile_trip_togethor/features/auth/domain/entities/user.dart';
 import 'chat_converstaion_event.dart';
+import 'chat_conversation_state.dart';
+import 'package:mobile_trip_togethor/core/shared/usecases/get_cache_user_usecase.dart';
 
 class ChatConversationBloc
     extends Bloc<ChatConversationEvent, ChatConversationState> {
   final GetCacheUserUseCase getCacheUserUseCase;
   final SocketManager socketManager;
+
   final List<Message> _messages = [];
   User? _currentUser;
 
-  ChatConversationBloc({required this.socketManager, required this.getCacheUserUseCase})
-      : super(ChatConversationInitial()) {
+  ChatConversationBloc({
+    required this.socketManager,
+    required this.getCacheUserUseCase,
+  }) : super(ChatConversationInitial()) {
     on<GetListMessageEvent>(_onGetMessages);
     on<JoinRoomEvent>(_onJoinRoom);
     on<SendMessageEvent>(_onSendMessage);
     on<ReceiveMessageEvent>(_onReceiveMessage);
     on<UserTypingEvent>(_onUserTyping);
+
+    // --- Thêm handler cho reaction ---
+    on<ReactMessageEvent>(_onReactMessage);
+
     _loadCachedUser();
   }
 
   Future<void> _loadCachedUser() async {
-    final result = await getCacheUserUseCase.call();
-    _currentUser = result;
-    print('Current user: ${_currentUser?.id}');
-    //
-    // if (_currentUser != null) {
-    //   socketManager.initAndConnect(userId: _currentUser!.id);
-    //   print('Socket connected with userId: ${_currentUser!.id}');
-    // } else {
-    //   print('⚠️ No cached user, socket not connected');
-    // }
-  }
-
-  void _onGetMessages(
-      GetListMessageEvent event, Emitter<ChatConversationState> emit) async {
-    emit(ChatConversationLoading());
-    try {
-      // Nếu muốn load từ repo, có thể thêm ở đây
-      emit(ChatConversationLoaded(List.from(_messages), _currentUser?.id));
-    } catch (e) {
-      emit(ChatConversationError(e.toString()));
+    _currentUser = await getCacheUserUseCase.call();
+    if (_currentUser != null) {
+      socketManager.initAndConnect(userId: _currentUser!.id);
+      print('Socket connected with userId: ${_currentUser!.id}');
+    } else {
+      print('⚠️ No cached user, socket not connected');
     }
   }
 
-  void _onJoinRoom(
-      JoinRoomEvent event, Emitter<ChatConversationState> emit) async {
+  void _onGetMessages(GetListMessageEvent event, Emitter<ChatConversationState> emit) {
+    emit(ChatConversationLoading());
+    emit(ChatConversationLoaded(List.from(_messages), _currentUser?.id));
+  }
+
+  void _onJoinRoom(JoinRoomEvent event, Emitter<ChatConversationState> emit) async {
     try {
       await socketManager.joinRoom(event.roomId);
-      // Lắng nghe message chỉ của room này
+
       socketManager.onMessage(event.roomId).listen((data) {
         add(ReceiveMessageEvent(data));
       });
+
       socketManager.onTyping(event.roomId).listen((data) {
         add(UserTypingEvent(data['userId'], data['isTyping']));
       });
+
+      socketManager.onMessageReactedStream(event.roomId).listen((data) {
+        add(ReactMessageEvent(
+          roomId: data['roomId'],
+          messageId: data['messageId'],
+          reaction: data['reaction'],
+          fromServer: true, // đánh dấu event từ server
+        ));
+      });
+
+
       print('📩 Joined room: ${event.roomId}');
     } catch (e) {
       print('❌ Join room failed: $e');
     }
   }
 
-  void _onSendMessage(
-      SendMessageEvent event, Emitter<ChatConversationState> emit) {
+  void _onSendMessage(SendMessageEvent event, Emitter<ChatConversationState> emit) {
+    if (_currentUser == null) return;
+
     final messageId = DateTime.now().millisecondsSinceEpoch.toString();
 
     final message = Message(
@@ -87,8 +97,6 @@ class ChatConversationBloc
     _messages.insert(0, message);
     emit(ChatConversationLoaded(List.from(_messages), _currentUser?.id));
 
-
-    // Gửi lên server
     socketManager.sendMessage(event.roomId, {
       'id': messageId,
       'roomId': event.roomId,
@@ -100,37 +108,22 @@ class ChatConversationBloc
       'isEdited': false,
       'isDeleted': false,
       'reactions': [],
-      'updatedAt': message.updatedAt.toIso8601String(),
       'createdAt': message.createdAt.toIso8601String(),
+      'updatedAt': message.updatedAt.toIso8601String(),
     });
   }
 
-
-  void _onReceiveMessage(
-      ReceiveMessageEvent event, Emitter<ChatConversationState> emit) {
+  void _onReceiveMessage(ReceiveMessageEvent event, Emitter<ChatConversationState> emit) {
     final data = event.message;
-
-    // Tìm message đang gửi với cùng id, cập nhật content & status
     final index = _messages.indexWhere((m) => m.id == data['id']);
+
     if (index != -1) {
-      // Cập nhật tin nhắn client thành server said
-      _messages[index] = Message(
-        id: data['id'],
-        roomId: data['roomId'],
-        senderId: data['senderId'],
+      _messages[index] = _messages[index].copyWith(
         content: data['content'],
-        type: 'text',
-        mentionedUserIds: [],
-        isPinned: false,
-        isEdited: false,
-        isDeleted: false,
-        reactions: [],
-        createdAt: DateTime.parse(data['createdAt']),
         updatedAt: DateTime.parse(data['updatedAt']),
         status: MessageStatus.sent,
       );
     } else {
-      // Tin nhắn mới từ server, insert bình thường
       _messages.insert(
         0,
         Message(
@@ -144,8 +137,8 @@ class ChatConversationBloc
           isEdited: false,
           isDeleted: false,
           reactions: [],
-          updatedAt: DateTime.parse(data['updatedAt']),
           createdAt: DateTime.parse(data['createdAt']),
+          updatedAt: DateTime.parse(data['updatedAt']),
           status: MessageStatus.received,
         ),
       );
@@ -171,6 +164,43 @@ class ChatConversationBloc
         updatedTypingIds,
       ));
     }
+  }
+
+  // --- Xử lý reaction ---
+  void _onReactMessage(ReactMessageEvent event, Emitter<ChatConversationState> emit) {
+    if (state is! ChatConversationLoaded) return;
+
+    final currentState = state as ChatConversationLoaded;
+
+    final updatedMessages = currentState.messages.map((msg) {
+      if (msg.id == event.messageId) {
+        final newReactions = List<String>.from(msg.reactions);
+
+        // Nếu reaction chưa tồn tại thì thêm
+        if (!newReactions.contains(event.reaction)) {
+          newReactions.add(event.reaction);
+        }
+
+        // Chỉ gửi lên server nếu event từ UI, không phải server
+        if (!event.fromServer) {
+          socketManager.reactMessage(event.roomId, {
+            'messageId': msg.id,
+            'reaction': event.reaction,
+            'roomId': event.roomId,
+            'userId': currentState.currentUserId,
+          });
+        }
+
+        return msg.copyWith(reactions: newReactions);
+      }
+      return msg;
+    }).toList();
+
+    emit(ChatConversationLoaded(
+      updatedMessages,
+      currentState.currentUserId,
+      currentState.typingUserIds,
+    ));
   }
 
 
