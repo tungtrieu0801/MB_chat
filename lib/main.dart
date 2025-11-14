@@ -16,27 +16,33 @@ void main() async {
 
   // --- Khởi tạo Dependency Injection ---
   await di.init();
-  final socketManager = di.sl<SocketManager>();
-
-  // Make sure socket init and connect before UI render.
-  socketManager.initAndConnect();
-  runApp(MyApp(socketManager: socketManager));
+  // final socketManager = di.sl<SocketManager>();
+  // final getCacheUserUseCase = di.sl<GetCacheUserUseCase>();
+  // final cacheUser = await getCacheUserUseCase();
+  // final userId = cacheUser?.id;
+  // // Make sure socket init and connect before UI render.
+  // if (userId != null) {
+  //   socketManager.initAndConnect(userId: userId);
+  //   print('Send userId: ${userId} to socket');
+  // } else {
+  //   print('can not get userId to send to socket');
+  // }
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final SocketManager socketManager;
-  const MyApp({super.key, required this.socketManager});
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (_) => AuthBloc(di.sl<LoginUsecase>()),
+          create: (_) => AuthBloc(di.sl<LoginUsecase>(), di.sl<SocketManager>()),
         ),
         BlocProvider(
           create: (_) => ChatConversationBloc(
-              socketManager: socketManager,
+            socketManager: di.sl<SocketManager>(),
             getCacheUserUseCase: di.sl<GetCacheUserUseCase>(),
           ),
         ),

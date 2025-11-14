@@ -27,6 +27,13 @@ class ChatConversationBloc
     final result = await getCacheUserUseCase.call();
     _currentUser = result;
     print('Current user: ${_currentUser?.id}');
+    //
+    // if (_currentUser != null) {
+    //   socketManager.initAndConnect(userId: _currentUser!.id);
+    //   print('Socket connected with userId: ${_currentUser!.id}');
+    // } else {
+    //   print('⚠️ No cached user, socket not connected');
+    // }
   }
 
   void _onGetMessages(

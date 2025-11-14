@@ -15,7 +15,7 @@ class SocketManager {
 
   bool get isConnected => _socket?.connected == true;
 
-  void initAndConnect({String? namespacePath}) {
+  void initAndConnect({required String userId}) {
     if (_socket != null && _socket!.connected) return;
     if (_isConnecting) return;
 
@@ -27,6 +27,7 @@ class SocketManager {
           .setTransports(['websocket', 'polling'])
           .enableAutoConnect()
           .enableReconnection()
+          .setQuery({ 'userId': userId })
           .build(),
     );
 
