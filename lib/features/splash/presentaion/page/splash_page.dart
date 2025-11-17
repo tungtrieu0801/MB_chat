@@ -35,7 +35,7 @@ class _SplashScreenState extends State<SplashScreen> {
     // Chuyển hướng an toàn với GoRouter
     if (cachedUser != null) {
       print('Cached profile found: ${cachedUser.toString()}');
-      context.go('/auth');       // Home
+      context.go('/');        // Home
     } else {
       print('No cached profile found');
       context.go('/auth');   // Login

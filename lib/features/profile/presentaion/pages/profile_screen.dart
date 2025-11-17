@@ -16,7 +16,9 @@ class ProfileScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
-            onPressed: () {},
+            onPressed: () {
+              context.go('/setting');
+            },
           ),
         ],
         backgroundColor: Colors.grey[300],

@@ -12,6 +12,7 @@ import 'package:mobile_trip_togethor/features/chat/presentation/screens/chat_lis
 import 'package:mobile_trip_togethor/features/chat/presentation/screens/phone_call_screen.dart';
 import 'package:mobile_trip_togethor/features/chat/presentation/screens/video_call_screen.dart';
 import 'package:mobile_trip_togethor/features/profile/presentaion/pages/qr_code_screen.dart';
+import 'package:mobile_trip_togethor/features/setting/presentation/setting_screen.dart';
 import 'package:mobile_trip_togethor/features/splash/presentaion/page/splash_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -101,6 +102,10 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/qrcode',
       builder: (context, state) =>  QrCodeScreen(),
+    ),
+    GoRoute(
+      path: '/setting',
+      builder: (context, state) =>  SettingScreen(),
     ),
   ],
 );

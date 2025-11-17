@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:mobile_trip_togethor/core/network/socket_manager.dart';
 import 'package:mobile_trip_togethor/core/shared/repository/user_cache_repository.dart';
+import 'package:mobile_trip_togethor/core/shared/usecases/clear_cache_user_usecase.dart';
 import 'package:mobile_trip_togethor/core/shared/usecases/get_cache_user_usecase.dart';
 import 'package:mobile_trip_togethor/features/auth/data/datasources/impl/auth_remote_datasource_impl.dart';
 import 'package:mobile_trip_togethor/features/auth/data/repositories/user_cache_repository_impl.dart';
@@ -56,6 +57,7 @@ Future<void> init() async {
   sl.registerLazySingleton<GetListRoomUseCase>(() => GetListRoomUseCase(sl()));
   sl.registerLazySingleton<GetListMessageUseCase>(() => GetListMessageUseCase(sl()));
   sl.registerLazySingleton<GetCacheUserUseCase>(() => GetCacheUserUseCase(sl()));
+  sl.registerLazySingleton<ClearCacheUserUseCase>(() => ClearCacheUserUseCase(sl()));
 
   // Socket manager singleton
   sl.registerLazySingleton<SocketManager>(() => SocketManager());
