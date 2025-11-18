@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_trip_togethor/core/network/socket_manager.dart';
 import 'package:mobile_trip_togethor/features/chat/domain/entities/message.dart';
 import 'package:mobile_trip_togethor/features/auth/domain/entities/user.dart';
+import 'package:mobile_trip_togethor/features/chat/domain/entities/user_chat.dart';
 import 'package:mobile_trip_togethor/features/chat/domain/usecases/get_list_message_usecase.dart';
 import 'chat_converstaion_event.dart';
 import 'chat_conversation_state.dart';
@@ -105,6 +106,11 @@ class ChatConversationBloc
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
       status: MessageStatus.sending,
+      userChat: UserChat(
+        id: _currentUser!.id ?? '',
+        fullname: _currentUser!.fullName ?? '',
+        avatar: _currentUser!.avatar ?? '',
+      ),
     );
 
     _messages.insert(0, message);
@@ -128,37 +134,48 @@ class ChatConversationBloc
 
   void _onReceiveMessage(ReceiveMessageEvent event, Emitter<ChatConversationState> emit) {
     final data = event.message;
-    final index = _messages.indexWhere((m) => m.id == data['id']);
 
+    // Tạo Message mới từ dữ liệu socket
+    final newMessage = Message(
+      id: data['id'],
+      roomId: data['roomId'],
+      senderId: data['senderId'],
+      content: data['content'],
+      type: 'text',
+      mentionedUserIds: [],
+      isPinned: false,
+      isEdited: false,
+      isDeleted: false,
+      reactions: [],
+      createdAt: data['createdAt'] != null
+          ? DateTime.parse(data['createdAt'])
+          : DateTime.now(),
+      updatedAt: data['updatedAt'] != null
+          ? DateTime.parse(data['updatedAt'])
+          : DateTime.now(),
+      status: data['senderId'] == _currentUser?.id ? MessageStatus.sent : MessageStatus.received,
+      userChat: UserChat(
+        id: (data['user']?['_id'] as String?)
+            ?? (data['senderId'] as String?)
+            ?? 'unknown',
+        fullname: (data['user']?['fullname'] as String?) ?? '',
+        avatar: (data['user']?['avatar'] as String?) ?? '',
+      ),
+
+    );
+
+    // Kiểm tra tin nhắn đã tồn tại chưa
+    final index = _messages.indexWhere((m) => m.id == newMessage.id);
     if (index != -1) {
-      _messages[index] = _messages[index].copyWith(
-        content: data['content'],
-        updatedAt: DateTime.parse(data['updatedAt']),
-        status: MessageStatus.sent,
-      );
+      _messages[index] = newMessage; // overwrite luôn bằng object mới
     } else {
-      _messages.insert(
-        0,
-        Message(
-          id: data['id'],
-          roomId: data['roomId'],
-          senderId: data['senderId'],
-          content: data['content'],
-          type: 'text',
-          mentionedUserIds: [],
-          isPinned: false,
-          isEdited: false,
-          isDeleted: false,
-          reactions: [],
-          createdAt: DateTime.parse(data['createdAt']),
-          updatedAt: DateTime.parse(data['updatedAt']),
-          status: MessageStatus.received,
-        ),
-      );
+      _messages.insert(0, newMessage);
     }
 
-    emit(ChatConversationLoaded(List.from(_messages), _currentUser?.id));
+    // Emit state mới với list hoàn toàn mới
+    emit(ChatConversationLoaded([..._messages], _currentUser?.id));
   }
+
 
   void _onUserTyping(UserTypingEvent event, Emitter<ChatConversationState> emit) {
     if (state is ChatConversationLoaded) {

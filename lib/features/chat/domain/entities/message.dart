@@ -1,3 +1,5 @@
+import 'package:mobile_trip_togethor/features/chat/domain/entities/user_chat.dart';
+
 import 'reaction.dart';
 
 enum MessageStatus { sending, sent, received }
@@ -16,6 +18,7 @@ class Message {
   final DateTime createdAt;
   final DateTime updatedAt;
   MessageStatus status;
+  UserChat userChat;
 
   Message({
     required this.id,
@@ -31,6 +34,7 @@ class Message {
     required this.createdAt,
     required this.updatedAt,
     this.status = MessageStatus.sending,
+    required this.userChat,
   });
 
   // --- Factory from JSON ---
@@ -49,6 +53,11 @@ class Message {
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: DateTime.parse(json['updated_at']),
       status: MessageStatus.sent,
+      userChat: UserChat(
+        id: json['user']['_id'].toString(),
+        fullname: json['user']['fullname'].toString(),
+        avatar: json['user']['avatar'].toString(),
+      ),
     );
   }
 
@@ -73,6 +82,7 @@ class Message {
       createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       status: status ?? this.status,
+      userChat: userChat,
     );
   }
 }

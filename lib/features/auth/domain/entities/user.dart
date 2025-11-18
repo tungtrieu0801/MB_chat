@@ -5,6 +5,7 @@ class User {
   final String phoneNumber;
   final String accessToken;
   final String avatar;
+  final String fullName;
 
   User({
     required this.id,
@@ -13,5 +14,6 @@ class User {
     required this.phoneNumber,
     required this.accessToken,
     required this.avatar,
+    required this.fullName,
   });
 }

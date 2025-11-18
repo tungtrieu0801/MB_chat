@@ -8,6 +8,7 @@ class LoginResponseModel {
   final String phoneNumber;
   final String accessToken;
   final String avatar;
+  final String fullName;
 
   LoginResponseModel({
     required this.id,
@@ -16,6 +17,7 @@ class LoginResponseModel {
     required this.phoneNumber,
     required this.accessToken,
     required this.avatar,
+    required this.fullName,
   });
 
   /// Parse JSON trực tiếp user object, không check `data`
@@ -27,6 +29,7 @@ class LoginResponseModel {
       phoneNumber: json['phoneNumber'] ?? '',
       accessToken: json['accessToken'] ?? '',
       avatar: json['avatar'] ?? '',
+      fullName: json['fullName'],
     );
   }
 
@@ -37,6 +40,7 @@ class LoginResponseModel {
     'phoneNumber': phoneNumber,
     'accessToken': accessToken,
     'avatar': avatar,
+    'fullName': fullName,
   };
 
   /// Dùng để lưu vào SharedPreferences
@@ -54,6 +58,7 @@ class LoginResponseModel {
     phoneNumber: phoneNumber,
     accessToken: accessToken,
     avatar: avatar,
+    fullName: fullName
   );
 
   /// Convert từ domain entity sang model
@@ -64,5 +69,6 @@ class LoginResponseModel {
     phoneNumber: user.phoneNumber,
     accessToken: user.accessToken,
     avatar: user.avatar,
+    fullName: user.fullName
   );
 }

@@ -112,7 +112,7 @@ class _ChatDetailState extends State<ChatDetail> {
               isMine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
               children: [
                 Text(
-                  message.senderId,
+                  message.userChat.fullname,
                   style: TextStyle(
                     fontSize: 10,
                     color: isMine ? Colors.white70 : Colors.black54,

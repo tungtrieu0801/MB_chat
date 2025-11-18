@@ -21,6 +21,7 @@ class AuthRepositoryImpl implements AuthRepository {
         phoneNumber: userModel!.phoneNumber,
         accessToken: userModel.accessToken,
         avatar: userModel!.avatar,
+        fullName: userModel.fullName,
       );
 
       // Lưu vào local cache (SharedPreferences)

@@ -32,6 +32,7 @@ class MessageRepositoryImpl implements MessageRepository {
           reactions: model.reactions,
           createdAt: model.createdAt,
           updatedAt: model.updatedAt,
+          userChat: model.user.toEntity()
         );
       }).toList();
       return listMessageInRoom;
