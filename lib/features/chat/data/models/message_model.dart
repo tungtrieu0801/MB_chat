@@ -11,7 +11,7 @@ class MessageModel {
   final bool isPinned;
   final bool isEdited;
   final bool isDeleted;
-  final List reactions;
+  final List<String> reactions;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -41,7 +41,7 @@ class MessageModel {
       isPinned: json['isPinned'] ?? false,
       isEdited: json['isEdited'] ?? false,
       isDeleted: json['isDeleted'] ?? false,
-      reactions: json['reaction'],
+      reactions: List<String>.from(json['reaction'] ?? []),
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: DateTime.parse(json['updated_at']),
     );

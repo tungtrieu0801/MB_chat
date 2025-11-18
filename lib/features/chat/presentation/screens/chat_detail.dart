@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mobile_trip_togethor/features/chat/domain/entities/message.dart';
 import 'package:mobile_trip_togethor/features/chat/domain/entities/room.dart';
 import 'package:mobile_trip_togethor/features/chat/presentation/bloc/chat_conversation/chat_conversation_bloc.dart';
 import 'package:mobile_trip_togethor/features/chat/presentation/bloc/chat_conversation/chat_conversation_state.dart';
 import 'package:mobile_trip_togethor/features/chat/presentation/bloc/chat_conversation/chat_converstaion_event.dart';
 
-import '../bloc/video_call/video_call_bloc.dart';
-import '../bloc/video_call/video_call_event.dart';
+import '../../../../utils/time_util.dart';
 
 class ChatDetail extends StatefulWidget {
   final Room room;
@@ -123,6 +122,11 @@ class _ChatDetailState extends State<ChatDetail> {
                 Text(
                   message.content,
                   style: TextStyle(color: isMine ? Colors.white : Colors.black87),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  formatTimeMessage(message.createdAt.toString()),
+                  style: TextStyle(color: isMine ? Colors.white : Colors.black87, fontSize: 8.sp),
                 ),
                 const SizedBox(height: 4),
                 if (isMine)

@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_trip_togethor/core/network/socket_manager.dart';
 import 'package:mobile_trip_togethor/features/chat/domain/entities/message.dart';
 import 'package:mobile_trip_togethor/features/auth/domain/entities/user.dart';
+import 'package:mobile_trip_togethor/features/chat/domain/usecases/get_list_message_usecase.dart';
 import 'chat_converstaion_event.dart';
 import 'chat_conversation_state.dart';
 import 'package:mobile_trip_togethor/core/shared/usecases/get_cache_user_usecase.dart';
@@ -10,11 +11,13 @@ class ChatConversationBloc
     extends Bloc<ChatConversationEvent, ChatConversationState> {
   final GetCacheUserUseCase getCacheUserUseCase;
   final SocketManager socketManager;
+  final GetListMessageUseCase getListMessageUseCase;
 
   final List<Message> _messages = [];
   User? _currentUser;
 
   ChatConversationBloc({
+    required this.getListMessageUseCase,
     required this.socketManager,
     required this.getCacheUserUseCase,
   }) : super(ChatConversationInitial()) {
@@ -40,9 +43,19 @@ class ChatConversationBloc
     }
   }
 
-  void _onGetMessages(GetListMessageEvent event, Emitter<ChatConversationState> emit) {
+  void _onGetMessages(GetListMessageEvent event, Emitter<ChatConversationState> emit) async {
     emit(ChatConversationLoading());
-    emit(ChatConversationLoaded(List.from(_messages), _currentUser?.id));
+    try {
+      final messages = await getListMessageUseCase.getListMessageInRoom(event.roomId);
+      _messages.clear();
+      _messages.addAll(
+          messages.map((m) => m.copyWith(status: MessageStatus.sent)) // <- override status
+      );
+      emit(ChatConversationLoaded(List.from(_messages), _currentUser?.id));
+    } catch (e) {
+      emit(ChatConversationError('Failed to load messages: $e'));
+      print('Failed to load messages: $e');
+    }
   }
 
   void _onJoinRoom(JoinRoomEvent event, Emitter<ChatConversationState> emit) async {
@@ -174,7 +187,7 @@ class ChatConversationBloc
 
     final updatedMessages = currentState.messages.map((msg) {
       if (msg.id == event.messageId) {
-        final newReactions = List<String>.from(msg.reactions);
+        final newReactions = List<String>.from(msg.reactions!);
 
         // Nếu reaction chưa tồn tại thì thêm
         if (!newReactions.contains(event.reaction)) {
